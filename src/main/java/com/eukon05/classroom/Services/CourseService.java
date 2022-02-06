@@ -1,6 +1,9 @@
 package com.eukon05.classroom.Services;
 
+import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.Domains.AppUser;
+import com.eukon05.classroom.Domains.AppUserCourse;
+import com.eukon05.classroom.Domains.Assignment;
 import com.eukon05.classroom.Domains.Course;
 import com.eukon05.classroom.Repositories.AppUserCourseRepository;
 import com.eukon05.classroom.Repositories.CourseRepository;
@@ -8,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -17,6 +21,7 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final AppUserCourseRepository appUserCourseRepository;
+    private final AssignmentService assignmentService;
 
     @Setter
     private UserService userService;
@@ -64,13 +69,59 @@ public class CourseService {
         courseRepository.save(course);
         userService.updateUser(appUser);
 
+    }
 
-        /*
-        The problem is as follows: the AppUserCourseId isn't saved to the DB after adding the course to the user.
-        You need to save the ID to the DB after calling the addCourse() method from user object
-         */
+
+    public List<Assignment> getAssignments(String username, int id) throws Exception {
+
+        AppUser appUser = userService.getUserByUsername(username);
+        Course course = getCourseById(id);
+
+        if(getAppUserCourse(appUser, course)==null)
+            throw new Exception("Access Denied");
+
+        return assignmentService.getAssignmentsForCourse(id);
 
     }
+
+    public void createAssignment(String username, int courseId, AssignmentDTO assignmentDTO) throws Exception {
+
+        AppUser appUser = userService.getUserByUsername(username);
+        Course course = getCourseById(courseId);
+
+        AppUserCourse auc = getAppUserCourse(appUser, course);
+
+        if(auc==null || !auc.isTeacher())
+            throw new Exception("Access Denied");
+
+        assignmentService.createAssignment(courseId, assignmentDTO.title, assignmentDTO.content, assignmentDTO.link);
+
+    }
+
+    public void deleteAssignment(String username, int courseId, int assignmentId) throws Exception {
+
+        AppUser appUser = userService.getUserByUsername(username);
+        Course course = getCourseById(courseId);
+
+        AppUserCourse auc = getAppUserCourse(appUser, course);
+
+        if(auc==null || !auc.isTeacher())
+            throw new Exception("Access Denied");
+
+        assignmentService.deleteAssignment(assignmentId);
+    }
+
+    private AppUserCourse getAppUserCourse(AppUser appUser, Course course) {
+
+        for(AppUserCourse auc : course.getAppUsers()){
+            if(auc.getAppUser().equals(appUser)){
+                return  auc;
+            }
+        }
+
+        return null;
+    }
+
 
     private String generateCourseKey(int length){
         String result = "";
@@ -87,4 +138,9 @@ public class CourseService {
     public void updateCourse(Course course) {
         courseRepository.save(course);
     }
+
+    public void forceDeleteCourse(Course course) {
+        courseRepository.delete(course);
+    }
+
 }

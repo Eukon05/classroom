@@ -38,7 +38,8 @@ public class UserService implements UserDetailsService {
         appUserRepository.save(user);
     }
 
-    public AppUser createUser(AppUserDTO appUserDTO) throws Exception {
+
+    public void createUser(AppUserDTO appUserDTO) throws Exception {
         Optional<AppUser> tmpUser = appUserRepository.findAppUserByUsername(appUserDTO.username);
 
         if(tmpUser.isPresent())
@@ -46,7 +47,6 @@ public class UserService implements UserDetailsService {
 
         AppUser user = new AppUser(appUserDTO.username, appUserDTO.password, appUserDTO.name, appUserDTO.surname);
         appUserRepository.save(user);
-        return user;
 
     }
 
@@ -87,7 +87,12 @@ public class UserService implements UserDetailsService {
         AppUser user = getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
         appUserCourseRepository.delete(removeCourse(user, course));
-        courseService.updateCourse(course);
+
+        if(course.getAppUsers().isEmpty())
+            courseService.forceDeleteCourse(course);
+        else
+            courseService.updateCourse(course);
+
         appUserRepository.save(user);
     }
 

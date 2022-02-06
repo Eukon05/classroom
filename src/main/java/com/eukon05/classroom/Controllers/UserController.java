@@ -1,12 +1,11 @@
 package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
-import com.eukon05.classroom.Domains.AppUser;
+import com.eukon05.classroom.DTOs.CourseDTO;
 import com.eukon05.classroom.Services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -46,9 +45,9 @@ public class UserController {
     }
 
     @PostMapping("self/courses")
-    public ResponseEntity<Object> joinCourse(Principal principal, @RequestParam String inviteCode){
+    public ResponseEntity<Object> joinCourse(Principal principal, @RequestBody CourseDTO courseDTO){
         try{
-            userService.joinCourse(principal.getName(), inviteCode);
+            userService.joinCourse(principal.getName(), courseDTO.inviteCode);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch(Exception ex){
@@ -57,10 +56,10 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("self/courses")
-    public ResponseEntity<Object> leaveCourse(Principal principal, @RequestParam int courseId){
+    @DeleteMapping("self/courses/{id}")
+    public ResponseEntity<Object> leaveCourse(Principal principal, @PathVariable int id){
         try{
-            userService.leaveCourse(principal.getName(), courseId);
+            userService.leaveCourse(principal.getName(), id);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch(Exception ex){
