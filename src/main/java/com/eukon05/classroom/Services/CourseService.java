@@ -42,7 +42,10 @@ public class CourseService {
         return courseOptional.get();
     }
     
-    public void createCourse(String username, String courseName){
+    public void createCourse(String username, String courseName) throws Exception {
+
+        if(courseName==null)
+            throw new Exception("Missing parameters");
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = new Course(courseName);
@@ -71,6 +74,27 @@ public class CourseService {
 
     }
 
+    public void deleteCourse(String username, int courseId) throws Exception {
+
+        AppUser appUser = userService.getUserByUsername(username);
+        Course course = getCourseById(courseId);
+
+        AppUserCourse auc = getAppUserCourse(appUser, course);
+
+        if(auc==null || !auc.isTeacher())
+            throw new Exception("Access Denied");
+
+        for(int i = course.getAppUsers().size()-1; i>=0; i--){
+            AppUserCourse appUserCourse = course.getAppUsers().get(i);
+            AppUser user = appUserCourse.getAppUser();
+            appUserCourseRepository.delete(userService.removeCourse(user, course));
+            userService.updateUser(user);
+        }
+
+        forceDeleteCourse(course);
+
+    }
+
 
     public List<Assignment> getAssignments(String username, int id) throws Exception {
 
@@ -88,6 +112,9 @@ public class CourseService {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
+
+        if(assignmentDTO.title==null)
+            throw new Exception("Missing parameters");
 
         AppUserCourse auc = getAppUserCourse(appUser, course);
 
@@ -141,6 +168,7 @@ public class CourseService {
 
     public void forceDeleteCourse(Course course) {
         courseRepository.delete(course);
+        assignmentService.deleteAllAssignmentsFromCourse(course.getId());
     }
 
 }

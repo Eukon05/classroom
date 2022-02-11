@@ -32,6 +32,20 @@ public class UserController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @DeleteMapping("self")
+    public ResponseEntity<Object> deleteUser(Principal principal){
+
+        try{
+            userService.deleteUser(principal.getName());
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
 
     @GetMapping("self/courses")
     public ResponseEntity<Object> getUserCourses(Principal principal){

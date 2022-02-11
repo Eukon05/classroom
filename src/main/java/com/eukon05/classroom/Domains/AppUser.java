@@ -1,5 +1,6 @@
 package com.eukon05.classroom.Domains;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.*;
 
+@JsonIgnoreProperties(value="password")
 @Getter
 @Setter
 @NoArgsConstructor

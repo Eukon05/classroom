@@ -31,6 +31,20 @@ public class CourseController {
 
     }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity<Object> deleteCourse(Principal principal, @PathVariable int id){
+
+        try{
+            courseService.deleteCourse(principal.getName(), id);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
     @GetMapping(path = "{id}/assignments")
     public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int id){
 
@@ -58,7 +72,7 @@ public class CourseController {
 
     }
 
-    @PostMapping(path = "{id}/assignments/{assignmentId}")
+    @DeleteMapping(path = "{id}/assignments/{assignmentId}")
     public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int id, @PathVariable int assignmentId){
 
         try{

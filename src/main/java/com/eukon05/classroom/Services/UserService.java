@@ -45,10 +45,14 @@ public class UserService implements UserDetailsService {
         if(tmpUser.isPresent())
             throw new Exception("User with that username already exists");
 
+        if(appUserDTO.username==null || appUserDTO.password==null || appUserDTO.name==null || appUserDTO.surname==null)
+            throw new Exception("Missing parameters");
+
         AppUser user = new AppUser(appUserDTO.username, appUserDTO.password, appUserDTO.name, appUserDTO.surname);
         appUserRepository.save(user);
 
     }
+
 
     public AppUser getUserByUsername(String username){
         Optional<AppUser> user = appUserRepository.findAppUserByUsername(username);
@@ -60,6 +64,31 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return getUserByUsername(username);
+    }
+
+    public void deleteUser(String username) {
+
+        AppUser user = getUserByUsername(username);
+        List<Course> courses = new ArrayList<>();
+
+        for(AppUserCourse appUserCourse : user.getCourses()){
+            courses.add(appUserCourse.getCourse());
+        }
+
+        for(Course course : courses) {
+
+            appUserCourseRepository.delete(removeCourse(user, course));
+
+            if (course.getAppUsers().isEmpty())
+                courseService.forceDeleteCourse(course);
+            else
+                courseService.updateCourse(course);
+
+            appUserRepository.save(user);
+
+        }
+
+        appUserRepository.delete(user);
     }
 
 
@@ -96,6 +125,8 @@ public class UserService implements UserDetailsService {
         appUserRepository.save(user);
     }
 
+
+
     public AppUserCourse addCourse(AppUser user, Course course, boolean isTeacher){
         AppUserCourse appUserCourse = new AppUserCourse(user, course, isTeacher);
         user.getCourses().add(appUserCourse);
@@ -119,4 +150,5 @@ public class UserService implements UserDetailsService {
 
         return null;
     }
+
 }

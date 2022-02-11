@@ -25,6 +25,10 @@ public class AssignmentService {
         assignmentRepository.save(assignment);
     }
 
+    public void deleteAllAssignmentsFromCourse(int courseId){
+        assignmentRepository.deleteAll(getAssignmentsForCourse(courseId));
+    }
+
     public void deleteAssignment(int assignmentId) throws Exception {
 
         Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
