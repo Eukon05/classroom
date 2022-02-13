@@ -2,6 +2,7 @@ package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.DTOs.CourseDTO;
+import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,11 @@ public class CourseController {
 
         try{
             courseService.createCourse(principal.getName(), courseDTO.name);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
         }
-        catch (Exception ex){
+        catch (UserNotFoundException | MissingParametersException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -38,9 +39,13 @@ public class CourseController {
             courseService.deleteCourse(principal.getName(), id);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch (Exception ex){
+        catch (UserNotFoundException | CourseNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }
@@ -51,9 +56,13 @@ public class CourseController {
         try{
             return new ResponseEntity<>(courseService.getAssignments(principal.getName(), id), HttpStatus.OK);
         }
-        catch (Exception ex){
+        catch (UserNotFoundException | CourseNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }
@@ -63,11 +72,15 @@ public class CourseController {
 
         try{
             courseService.createAssignment(principal.getName(), id, dto);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
         }
-        catch (Exception ex){
+        catch (UserNotFoundException | MissingParametersException | CourseNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }
@@ -79,9 +92,13 @@ public class CourseController {
             courseService.deleteAssignment(principal.getName(), id, assignmentId);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch (Exception ex){
+        catch (UserNotFoundException | CourseNotFoundException | AssignmentNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }

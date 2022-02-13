@@ -1,8 +1,8 @@
 package com.eukon05.classroom.Services;
 
 import com.eukon05.classroom.Domains.Assignment;
+import com.eukon05.classroom.Exceptions.AssignmentNotFoundException;
 import com.eukon05.classroom.Repositories.AssignmentRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +29,12 @@ public class AssignmentService {
         assignmentRepository.deleteAll(getAssignmentsForCourse(courseId));
     }
 
-    public void deleteAssignment(int assignmentId) throws Exception {
+    public void deleteAssignment(int assignmentId) throws AssignmentNotFoundException {
 
         Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
 
         if(assignment.isEmpty())
-            throw new Exception("Assignment with this ID doesn't exist");
+            throw new AssignmentNotFoundException();
 
         assignmentRepository.delete(assignment.get());
 

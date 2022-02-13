@@ -5,6 +5,7 @@ import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Assignment;
 import com.eukon05.classroom.Domains.Course;
+import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Repositories.AppUserCourseRepository;
 import com.eukon05.classroom.Repositories.CourseRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,26 +27,26 @@ public class CourseService {
     @Setter
     private UserService userService;
 
-    public Course getCourseByInviteCode(String inviteCode) throws Exception {
+    public Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException {
 
         Optional<Course> courseOptional = courseRepository.findCourseByInviteCode(inviteCode);
         if(courseOptional.isEmpty())
-            throw new Exception("Course with this invite code doesn't exist");
+            throw new CourseNotFoundException();
         return courseOptional.get();
         
     }
 
-    public Course getCourseById(int id) throws Exception {
+    public Course getCourseById(int id) throws CourseNotFoundException {
         Optional<Course> courseOptional = courseRepository.findById(id);
         if(courseOptional.isEmpty())
-            throw new Exception("Course with this id doesn't exist");
+            throw new CourseNotFoundException();
         return courseOptional.get();
     }
     
-    public void createCourse(String username, String courseName) throws Exception {
+    public void createCourse(String username, String courseName) throws MissingParametersException, UserNotFoundException {
 
         if(courseName==null)
-            throw new Exception("Missing parameters");
+            throw new MissingParametersException();
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = new Course(courseName);
@@ -74,7 +75,7 @@ public class CourseService {
 
     }
 
-    public void deleteCourse(String username, int courseId) throws Exception {
+    public void deleteCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
@@ -82,7 +83,7 @@ public class CourseService {
         AppUserCourse auc = getAppUserCourse(appUser, course);
 
         if(auc==null || !auc.isTeacher())
-            throw new Exception("Access Denied");
+            throw new AccessDeniedException();
 
         for(int i = course.getAppUsers().size()-1; i>=0; i--){
             AppUserCourse appUserCourse = course.getAppUsers().get(i);
@@ -96,36 +97,38 @@ public class CourseService {
     }
 
 
-    public List<Assignment> getAssignments(String username, int id) throws Exception {
+    public List<Assignment> getAssignments(String username, int id) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(id);
 
         if(getAppUserCourse(appUser, course)==null)
-            throw new Exception("Access Denied");
+            throw new AccessDeniedException();
 
         return assignmentService.getAssignmentsForCourse(id);
 
     }
 
-    public void createAssignment(String username, int courseId, AssignmentDTO assignmentDTO) throws Exception {
+    public void createAssignment(String username, int courseId, AssignmentDTO assignmentDTO)
+            throws UserNotFoundException, CourseNotFoundException, MissingParametersException, AccessDeniedException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
         if(assignmentDTO.title==null)
-            throw new Exception("Missing parameters");
+            throw new MissingParametersException();
 
         AppUserCourse auc = getAppUserCourse(appUser, course);
 
         if(auc==null || !auc.isTeacher())
-            throw new Exception("Access Denied");
+            throw new AccessDeniedException();
 
         assignmentService.createAssignment(courseId, assignmentDTO.title, assignmentDTO.content, assignmentDTO.link);
 
     }
 
-    public void deleteAssignment(String username, int courseId, int assignmentId) throws Exception {
+    public void deleteAssignment(String username, int courseId, int assignmentId)
+            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
@@ -133,7 +136,7 @@ public class CourseService {
         AppUserCourse auc = getAppUserCourse(appUser, course);
 
         if(auc==null || !auc.isTeacher())
-            throw new Exception("Access Denied");
+            throw new AccessDeniedException();
 
         assignmentService.deleteAssignment(assignmentId);
     }

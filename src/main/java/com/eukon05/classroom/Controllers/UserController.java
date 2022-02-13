@@ -2,6 +2,10 @@ package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.CourseDTO;
+import com.eukon05.classroom.Exceptions.CourseNotFoundException;
+import com.eukon05.classroom.Exceptions.MissingParametersException;
+import com.eukon05.classroom.Exceptions.UserNotFoundException;
+import com.eukon05.classroom.Exceptions.UsernameTakenException;
 import com.eukon05.classroom.Services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,12 +28,12 @@ public class UserController {
         try{
             userService.createUser(appUserDto);
         }
-        catch (Exception ex){
+        catch (UsernameTakenException | MissingParametersException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
     }
 
     @DeleteMapping("self")
@@ -39,10 +43,11 @@ public class UserController {
             userService.deleteUser(principal.getName());
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch(Exception ex){
+        catch (UserNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
+
 
     }
 
@@ -52,9 +57,9 @@ public class UserController {
         try{
             return new ResponseEntity<>(userService.getUserCourses(principal.getName()), HttpStatus.OK);
         }
-        catch(Exception ex){
+        catch(UserNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -64,9 +69,9 @@ public class UserController {
             userService.joinCourse(principal.getName(), courseDTO.inviteCode);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch(Exception ex){
+        catch(UserNotFoundException | CourseNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -76,9 +81,9 @@ public class UserController {
             userService.leaveCourse(principal.getName(), id);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch(Exception ex){
+        catch(UserNotFoundException | CourseNotFoundException ex){
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

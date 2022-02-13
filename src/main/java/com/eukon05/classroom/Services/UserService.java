@@ -4,12 +4,13 @@ import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Course;
+import com.eukon05.classroom.Exceptions.CourseNotFoundException;
+import com.eukon05.classroom.Exceptions.MissingParametersException;
+import com.eukon05.classroom.Exceptions.UserNotFoundException;
+import com.eukon05.classroom.Exceptions.UsernameTakenException;
 import com.eukon05.classroom.Repositories.AppUserCourseRepository;
 import com.eukon05.classroom.Repositories.AppUserRepository;
-import com.eukon05.classroom.Repositories.CourseRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,14 +40,14 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public void createUser(AppUserDTO appUserDTO) throws Exception {
+    public void createUser(AppUserDTO appUserDTO) throws MissingParametersException, UsernameTakenException {
         Optional<AppUser> tmpUser = appUserRepository.findAppUserByUsername(appUserDTO.username);
 
         if(tmpUser.isPresent())
-            throw new Exception("User with that username already exists");
+            throw new UsernameTakenException(appUserDTO.username);
 
         if(appUserDTO.username==null || appUserDTO.password==null || appUserDTO.name==null || appUserDTO.surname==null)
-            throw new Exception("Missing parameters");
+            throw new MissingParametersException();
 
         AppUser user = new AppUser(appUserDTO.username, appUserDTO.password, appUserDTO.name, appUserDTO.surname);
         appUserRepository.save(user);
@@ -54,19 +55,22 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public AppUser getUserByUsername(String username){
+    public AppUser getUserByUsername(String username) throws UserNotFoundException {
         Optional<AppUser> user = appUserRepository.findAppUserByUsername(username);
         if(user.isEmpty())
-            throw new UsernameNotFoundException("User with username " + username + " not found");
+            throw new UserNotFoundException(username);
         return user.get();
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return getUserByUsername(username);
+        try {return getUserByUsername(username);}
+
+        catch (UserNotFoundException e){throw new UsernameNotFoundException(e.getMessage());}
+
     }
 
-    public void deleteUser(String username) {
+    public void deleteUser(String username) throws UserNotFoundException {
 
         AppUser user = getUserByUsername(username);
         List<Course> courses = new ArrayList<>();
@@ -92,7 +96,7 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public List<Course> getUserCourses(String username) {
+    public List<Course> getUserCourses(String username) throws UserNotFoundException {
         AppUser user = getUserByUsername(username);
         List<Course> courses = new ArrayList<>();
 
@@ -103,7 +107,7 @@ public class UserService implements UserDetailsService {
         return courses;
     }
 
-    public void joinCourse(String username, String inviteCode) throws Exception {
+    public void joinCourse(String username, String inviteCode) throws UserNotFoundException, CourseNotFoundException {
         AppUser user = getUserByUsername(username);
         Course course = courseService.getCourseByInviteCode(inviteCode);
         appUserCourseRepository.save(addCourse(user, course, false));
@@ -112,7 +116,7 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public void leaveCourse(String username, int courseId) throws Exception {
+    public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException {
         AppUser user = getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
         appUserCourseRepository.delete(removeCourse(user, course));

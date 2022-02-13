@@ -23,9 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-//The @ActiveProfiles annotation cannot be linked to the DEV profile!
-//You need to create a separate profile and a database for testing!
-@ActiveProfiles(profiles = "dev")
+@ActiveProfiles("test")
 public class ApiTests {
 
     @Autowired
@@ -50,25 +48,28 @@ public class ApiTests {
 
     @Test
     @Order(1)
+    @DisplayName("Should create a new user")
     void createUserTest() throws Exception {
 
         mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(gson.toJson(dto)))
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().string("SUCCESS"));
 
     }
 
     @Test
     @Order(2)
+    @DisplayName("Should authenticate the user")
     void authenticateUserTest() throws Exception {
         getAuth();
     }
 
     @Test
     @Order(3)
+    @DisplayName("Should return an empty array of courses")
     void getCoursesTest1() throws Exception {
 
         String auth = getAuth();
@@ -83,6 +84,7 @@ public class ApiTests {
 
     @Test
     @Order(4)
+    @DisplayName("Should create a new test course")
     void createCourseTest() throws Exception {
 
         String auth = getAuth();
@@ -92,7 +94,7 @@ public class ApiTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", auth))
 
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().string(equalTo("SUCCESS")));
 
 
@@ -100,6 +102,7 @@ public class ApiTests {
 
     @Test
     @Order(5)
+    @DisplayName("Should return an array with the test course inside")
     void getCoursesTest2() throws Exception {
 
         String auth = getAuth();
@@ -111,6 +114,7 @@ public class ApiTests {
 
     @Test
     @Order(6)
+    @DisplayName("Should create an assignment linked to the test course")
     void createAssignmentTest() throws Exception {
 
         String auth = getAuth();
@@ -121,13 +125,14 @@ public class ApiTests {
                     .header("Authorization", auth)
                     .content(gson.toJson(assignmentDTO)))
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().string(equalTo("SUCCESS")));
 
     }
 
     @Test
     @Order(7)
+    @DisplayName("Should return an array of assignments linked to the test course, containing the test assignment")
     void getAssignmentsTest() throws Exception {
 
         String auth = getAuth();
@@ -140,6 +145,7 @@ public class ApiTests {
 
     @Test
     @Order(8)
+    @DisplayName("Should delete the test assignment")
     void deleteAssignmentTest() throws Exception {
 
         String auth = getAuth();
@@ -157,6 +163,7 @@ public class ApiTests {
 
     @Test
     @Order(9)
+    @DisplayName("Should delete the test course")
     void deleteCourseTest() throws Exception {
 
         String auth = getAuth();
@@ -172,11 +179,9 @@ public class ApiTests {
     }
 
 
-
-
-
     @Test
     @Order(10)
+    @DisplayName("Should delete the test user")
     void deleteUserTest() throws Exception {
 
         String auth = getAuth();
