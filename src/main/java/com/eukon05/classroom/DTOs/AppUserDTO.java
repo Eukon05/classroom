@@ -6,5 +6,6 @@ public class AppUserDTO {
     public String password;
     public String name;
     public String surname;
+    public boolean isTeacher;
 
 }

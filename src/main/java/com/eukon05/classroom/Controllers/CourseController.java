@@ -103,4 +103,22 @@ public class CourseController {
 
     }
 
+    @GetMapping("{id}/users")
+    public ResponseEntity<Object> getUsers(Principal principal, @PathVariable int id){
+
+        try{
+            return new ResponseEntity<>(courseService.getCourseUsers(principal.getName(), id), HttpStatus.OK);
+        }
+        catch (UserNotFoundException | CourseNotFoundException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }
+
+
+    }
+
 }

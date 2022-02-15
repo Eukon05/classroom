@@ -1,5 +1,6 @@
 package com.eukon05.classroom.Services;
 
+import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -141,6 +143,29 @@ public class CourseService {
         assignmentService.deleteAssignment(assignmentId);
     }
 
+    public List<AppUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException {
+
+        AppUser appUser = userService.getUserByUsername(username);
+        Course course = getCourseById(courseId);
+
+        if(getAppUserCourse(appUser, course)==null)
+            throw new AccessDeniedException();
+
+        List<AppUserDTO> users = new ArrayList<>();
+
+        for(AppUserCourse auc : course.getAppUsers()){
+            AppUserDTO dto = new AppUserDTO();
+            dto.username = appUser.getUsername();
+            dto.name = appUser.getName();
+            dto.surname = appUser.getSurname();
+            dto.isTeacher = auc.isTeacher();
+            users.add(dto);
+        }
+
+        return users;
+
+    }
+
     private AppUserCourse getAppUserCourse(AppUser appUser, Course course) {
 
         for(AppUserCourse auc : course.getAppUsers()){
@@ -173,5 +198,6 @@ public class CourseService {
         courseRepository.delete(course);
         assignmentService.deleteAllAssignmentsFromCourse(course.getId());
     }
+
 
 }

@@ -3,6 +3,7 @@ package com.eukon05.classroom;
 import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.DTOs.CourseDTO;
+import com.eukon05.classroom.Domains.AppUser;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -114,6 +116,25 @@ public class ApiTests {
 
     @Test
     @Order(6)
+    @DisplayName("Should return an array of users attending the course")
+    void getAttendeesTest() throws Exception {
+
+        String auth = getAuth();
+        CourseDTO courseDTO = getCourse(auth);
+
+        String json = mockMvc.perform(get("/api/v1/courses/" + courseDTO.id + "/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", auth))
+                .andDo(print())
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        AppUser user = gson.fromJson(gson.fromJson(json, JsonArray.class).get(0).getAsJsonObject(), AppUser.class);
+        assertEquals(user.getUsername(), dto.username);
+
+    }
+
+    @Test
+    @Order(7)
     @DisplayName("Should create an assignment linked to the test course")
     void createAssignmentTest() throws Exception {
 
@@ -131,7 +152,7 @@ public class ApiTests {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     @DisplayName("Should return an array of assignments linked to the test course, containing the test assignment")
     void getAssignmentsTest() throws Exception {
 
@@ -144,7 +165,7 @@ public class ApiTests {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     @DisplayName("Should delete the test assignment")
     void deleteAssignmentTest() throws Exception {
 
@@ -162,7 +183,7 @@ public class ApiTests {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     @DisplayName("Should delete the test course")
     void deleteCourseTest() throws Exception {
 
@@ -180,7 +201,7 @@ public class ApiTests {
 
 
     @Test
-    @Order(10)
+    @Order(11)
     @DisplayName("Should delete the test user")
     void deleteUserTest() throws Exception {
 
