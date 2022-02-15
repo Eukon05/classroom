@@ -50,9 +50,5 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return NoOpPasswordEncoder.getInstance();
-    }
 
 }

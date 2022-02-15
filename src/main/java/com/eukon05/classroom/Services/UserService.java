@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,13 +27,15 @@ public class UserService implements UserDetailsService {
     private final AppUserRepository appUserRepository;
     private final CourseService courseService;
     private final AppUserCourseRepository appUserCourseRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(AppUserRepository repository, AppUserCourseRepository appUserCourseRepository, CourseService courseService){
+    public UserService(AppUserRepository repository, AppUserCourseRepository appUserCourseRepository, CourseService courseService, PasswordEncoder passwordEncoder){
         appUserRepository=repository;
         this.appUserCourseRepository=appUserCourseRepository;
         this.courseService=courseService;
         this.courseService.setUserService(this);
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void updateUser(AppUser user){
@@ -50,6 +53,7 @@ public class UserService implements UserDetailsService {
             throw new MissingParametersException();
 
         AppUser user = new AppUser(appUserDTO.username, appUserDTO.password, appUserDTO.name, appUserDTO.surname);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         appUserRepository.save(user);
 
     }
