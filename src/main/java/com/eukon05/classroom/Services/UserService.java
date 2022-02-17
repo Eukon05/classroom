@@ -118,6 +118,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException {
+
         AppUser user = getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
@@ -128,12 +129,30 @@ public class UserService implements UserDetailsService {
 
         appUserCourseRepository.delete(auc);
 
-        if(course.getAppUsers().isEmpty())
+        if(course.getAppUsers().isEmpty()) {
             courseService.forceDeleteCourse(course);
-        else
-            courseService.updateCourse(course);
+            appUserRepository.save(user);
+            return;
+        }
 
+        boolean courseStillHasATeacher = false;
+
+        for(AppUserCourse auc2 : course.getAppUsers()){
+            if(auc2.isTeacher()) {
+                courseStillHasATeacher = true;
+                break;
+            }
+        }
+
+        if(!courseStillHasATeacher){
+            AppUserCourse newTeacher = course.getAppUsers().get(0);
+            newTeacher.setTeacher(true);
+            appUserCourseRepository.save(newTeacher);
+        }
+
+        courseService.updateCourse(course);
         appUserRepository.save(user);
+
     }
 
 
