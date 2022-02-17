@@ -4,10 +4,7 @@ import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Course;
-import com.eukon05.classroom.Exceptions.CourseNotFoundException;
-import com.eukon05.classroom.Exceptions.MissingParametersException;
-import com.eukon05.classroom.Exceptions.UserNotFoundException;
-import com.eukon05.classroom.Exceptions.UsernameTakenException;
+import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Repositories.AppUserCourseRepository;
 import com.eukon05.classroom.Repositories.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,10 +117,16 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException {
+    public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException {
         AppUser user = getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
-        appUserCourseRepository.delete(removeCourse(user, course));
+
+        AppUserCourse auc = removeCourse(user, course);
+
+        if(auc==null)
+            throw new UserNotAttendingTheCourseException(username, courseId);
+
+        appUserCourseRepository.delete(auc);
 
         if(course.getAppUsers().isEmpty())
             courseService.forceDeleteCourse(course);

@@ -55,15 +55,11 @@ public class CourseService {
         Optional<Course> tmp;
         String random;
 
-        while(true) {
+        do {
             random = generateCourseKey(6);
             tmp = courseRepository.findCourseByInviteCode(random);
 
-            if(tmp.isEmpty()){
-                break;
-            }
-
-        }
+        } while (tmp.isPresent());
 
         course.setInviteCode(random);
 
@@ -155,15 +151,29 @@ public class CourseService {
 
         for(AppUserCourse auc : course.getAppUsers()){
             AppUserDTO dto = new AppUserDTO();
-            dto.username = appUser.getUsername();
-            dto.name = appUser.getName();
-            dto.surname = appUser.getSurname();
+            AppUser au = auc.getAppUser();
+            dto.username = au.getUsername();
+            dto.name = au.getName();
+            dto.surname = au.getSurname();
             dto.isTeacher = auc.isTeacher();
             users.add(dto);
         }
 
         return users;
 
+    }
+
+    public void deleteUserFromCourse(String principalUsername, String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException {
+
+        AppUser appUser = userService.getUserByUsername(principalUsername);
+        Course course = getCourseById(courseId);
+
+        AppUserCourse auc = getAppUserCourse(appUser, course);
+
+        if(auc==null || !auc.isTeacher())
+            throw new AccessDeniedException();
+
+        userService.leaveCourse(username, courseId);
     }
 
     private AppUserCourse getAppUserCourse(AppUser appUser, Course course) {
@@ -179,15 +189,15 @@ public class CourseService {
 
 
     private String generateCourseKey(int length){
-        String result = "";
+        StringBuilder result = new StringBuilder();
         String characters = "QWERTYUIOPASDFGHJKLZXCVBNM1234567890";
         Random random = new Random();
 
         for(int i=0; i<length; i++){
-            result+=characters.charAt(random.nextInt(characters.length()));
+            result.append(characters.charAt(random.nextInt(characters.length())));
         }
 
-        return result;
+        return result.toString();
     }
 
     public void updateCourse(Course course) {

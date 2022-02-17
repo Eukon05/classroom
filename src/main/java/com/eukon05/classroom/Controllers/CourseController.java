@@ -1,5 +1,6 @@
 package com.eukon05.classroom.Controllers;
 
+import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.DTOs.CourseDTO;
 import com.eukon05.classroom.Exceptions.*;
@@ -114,6 +115,25 @@ public class CourseController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (AccessDeniedException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }
+
+
+    }
+
+    @DeleteMapping("{id}/users")
+    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody AppUserDTO appUserDTO, @PathVariable int id){
+
+        try{
+            courseService.deleteUserFromCourse(principal.getName(), appUserDTO.username, id);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        }
+        catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex) {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
