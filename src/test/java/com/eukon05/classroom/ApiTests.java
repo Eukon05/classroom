@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -73,33 +73,14 @@ public class ApiTests {
                 .andExpect(status().isCreated())
                 .andExpect(content().string("SUCCESS"));
 
+        getAuthForUserOne();
+        getAuthForUserTwo();
+
     }
+
 
     @Test
     @Order(2)
-    @DisplayName("Should authenticate the new users")
-    void authenticateUserTest() throws Exception {
-        getAuthForUserOne();
-        getAuthForUserTwo();
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Should return an empty array of courses")
-    void getCoursesTest1() throws Exception {
-
-        String auth = getAuthForUserOne();
-
-        mockMvc.perform(get("/api/v1/users/self/courses")
-                        .header("Authorization", auth))
-
-                .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("[]")));
-
-    }
-
-    @Test
-    @Order(4)
     @DisplayName("Should create a new test course")
     void createCourseTest() throws Exception {
 
@@ -113,23 +94,13 @@ public class ApiTests {
                 .andExpect(status().isCreated())
                 .andExpect(content().string(equalTo("SUCCESS")));
 
-
-    }
-
-    @Test
-    @Order(5)
-    @DisplayName("Should return an array with the test course inside")
-    void getCoursesTest2() throws Exception {
-
-        String auth = getAuthForUserOne();
         CourseDTO tmp = getCourse(auth);
-
         assertEquals(tmp.name, courseDTO.name);
 
     }
 
     @Test
-    @Order(6)
+    @Order(3)
     @DisplayName("Should add the second user to the test course")
     void joinCourseTest() throws Exception {
 
@@ -137,22 +108,7 @@ public class ApiTests {
         String auth2 = getAuthForUserTwo();
         CourseDTO courseDTO = getCourse(auth);
 
-        mockMvc.perform(post("/api/v1/users/self/courses")
-                .header("Authorization", auth2)
-                .content(gson.toJson(courseDTO))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk()).andExpect(content().string(equalTo("SUCCESS")));
-
-    }
-
-    @Test
-    @Order(7)
-    @DisplayName("Should return an array of users attending the course")
-    void getAttendeesTest() throws Exception {
-
-        String auth = getAuthForUserOne();
-        CourseDTO courseDTO = getCourse(auth);
+        joinCourse(auth2, courseDTO);
 
         String json = mockMvc.perform(get("/api/v1/courses/" + courseDTO.id + "/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -169,28 +125,61 @@ public class ApiTests {
     }
 
     @Test
-    @Order(8)
-    @DisplayName("Should delete the second user from the test course")
-    void deleteUSerFromCourseTest() throws Exception {
+    @Order(4)
+    @DisplayName("Should assign the second user a teacher role automatically")
+    void teacherAssignTest() throws Exception {
 
         String auth = getAuthForUserOne();
+        String auth2 = getAuthForUserTwo();
+        CourseDTO courseDTO = getCourse(auth);
+
+        String json = mockMvc.perform(get("/api/v1/courses/" + courseDTO.id + "/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", auth))
+                .andDo(print())
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        AppUserDTO userTwo = gson.fromJson(gson.fromJson(json, JsonArray.class).get(1).getAsJsonObject(), AppUserDTO.class);
+        assertFalse(userTwo.isTeacher);
+
+        leaveCourse(auth, courseDTO);
+
+        json = mockMvc.perform(get("/api/v1/courses/" + courseDTO.id + "/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", auth2))
+                .andDo(print())
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        userTwo = gson.fromJson(gson.fromJson(json, JsonArray.class).get(0).getAsJsonObject(), AppUserDTO.class);
+        assertTrue(userTwo.isTeacher);
+
+        joinCourse(auth, courseDTO);
+
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Should delete the first user from the test course")
+    void deleteUserFromCourseTest() throws Exception {
+
+        String auth = getAuthForUserTwo();
         CourseDTO courseDTO = getCourse(auth);
 
         mockMvc.perform(delete("/api/v1/courses/" + courseDTO.id + "/users")
                 .header("Authorization", auth)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(userTwoDTO)))
+                .content(gson.toJson(userOneDTO)))
                 .andDo(print())
                 .andExpect(status().isOk()).andExpect(content().string(equalTo("SUCCESS")));
 
     }
 
     @Test
-    @Order(9)
+    @Order(6)
     @DisplayName("Should create an assignment linked to the test course")
     void createAssignmentTest() throws Exception {
 
-        String auth = getAuthForUserOne();
+        String auth = getAuthForUserTwo();
         CourseDTO courseDTO = getCourse(auth);
 
         mockMvc.perform(post("/api/v1/courses/" + courseDTO.id + "/assignments")
@@ -201,27 +190,17 @@ public class ApiTests {
                 .andExpect(status().isCreated())
                 .andExpect(content().string(equalTo("SUCCESS")));
 
-    }
-
-    @Test
-    @Order(10)
-    @DisplayName("Should return an array of assignments linked to the test course, containing the test assignment")
-    void getAssignmentsTest() throws Exception {
-
-        String auth = getAuthForUserOne();
-        CourseDTO courseDTO = getCourse(auth);
         AssignmentDTO tmp = getAssignment(auth, courseDTO.id);
-
         assertEquals(tmp.title, assignmentDTO.title);
-
     }
 
+
     @Test
-    @Order(11)
+    @Order(7)
     @DisplayName("Should delete the test assignment")
     void deleteAssignmentTest() throws Exception {
 
-        String auth = getAuthForUserOne();
+        String auth = getAuthForUserTwo();
         CourseDTO courseDTO = getCourse(auth);
         AssignmentDTO assignmentDTO = getAssignment(auth, courseDTO.id);
 
@@ -235,11 +214,11 @@ public class ApiTests {
     }
 
     @Test
-    @Order(12)
+    @Order(8)
     @DisplayName("Should delete the test course")
     void deleteCourseTest() throws Exception {
 
-        String auth = getAuthForUserOne();
+        String auth = getAuthForUserTwo();
         CourseDTO courseDTO = getCourse(auth);
 
         mockMvc.perform(delete("/api/v1/courses/" + courseDTO.id)
@@ -253,7 +232,7 @@ public class ApiTests {
 
 
     @Test
-    @Order(13)
+    @Order(9)
     @DisplayName("Should delete the test user")
     void deleteUserTest() throws Exception {
 
@@ -304,6 +283,23 @@ public class ApiTests {
                         .getContentAsString(), JsonArray.class)
                 .get(0).getAsJsonObject(), CourseDTO.class);
 
+    }
+
+    private void joinCourse(String auth, CourseDTO courseDTO) throws Exception {
+        mockMvc.perform(post("/api/v1/users/self/courses")
+                        .header("Authorization", auth)
+                        .content(gson.toJson(courseDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk()).andExpect(content().string(equalTo("SUCCESS")));
+    }
+
+    private void leaveCourse(String auth, CourseDTO courseDTO) throws Exception {
+        mockMvc.perform(delete("/api/v1/users/self/courses/" + courseDTO.id)
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk()).andExpect(content().string(equalTo("SUCCESS")));
     }
 
     private AssignmentDTO getAssignment(String auth, int courseID) throws Exception {
