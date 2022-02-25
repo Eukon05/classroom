@@ -16,6 +16,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 
+import java.util.ArrayList;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -52,6 +54,9 @@ public class ApiTests {
         courseDTO.name = "Test Course";
 
         assignmentDTO.title = "Test Assignment";
+        assignmentDTO.links = new ArrayList<>();
+        assignmentDTO.links.add("https://google/com");
+        assignmentDTO.links.add("https://github.com");
     }
 
     @Test
@@ -192,6 +197,8 @@ public class ApiTests {
 
         AssignmentDTO tmp = getAssignment(auth, courseDTO.id);
         assertEquals(tmp.title, assignmentDTO.title);
+        assertEquals(tmp.links.get(0), assignmentDTO.links.get(0));
+        assertEquals(tmp.links.get(1), assignmentDTO.links.get(1));
     }
 
 

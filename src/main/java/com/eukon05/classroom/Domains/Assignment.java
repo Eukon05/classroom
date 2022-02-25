@@ -5,10 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,13 +22,16 @@ public class Assignment {
 
     private String title;
     private String content;
-    private String link;
+
+    @ElementCollection
+    private List<String> links = new ArrayList<>();
+
     private int courseID;
 
-    public Assignment(String title, String content, String link, int courseID){
+    public Assignment(String title, String content, List<String> links, int courseID){
         this.title=title;
         this.content=content;
-        this.link=link;
+        this.links=links;
         this.courseID=courseID;
     }
 

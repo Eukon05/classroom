@@ -121,7 +121,7 @@ public class CourseService {
         if(auc==null || !auc.isTeacher())
             throw new AccessDeniedException();
 
-        assignmentService.createAssignment(courseId, assignmentDTO.title, assignmentDTO.content, assignmentDTO.link);
+        assignmentService.createAssignment(courseId, assignmentDTO.title, assignmentDTO.content, assignmentDTO.links);
 
     }
 

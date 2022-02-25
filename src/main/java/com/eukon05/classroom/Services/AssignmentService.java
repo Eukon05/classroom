@@ -20,8 +20,8 @@ public class AssignmentService {
     }
 
 
-    public void createAssignment(int courseId, String title, String content, String link) {
-        Assignment assignment = new Assignment(title, content, link, courseId);
+    public void createAssignment(int courseId, String title, String content, List<String> links) {
+        Assignment assignment = new Assignment(title, content, links, courseId);
         assignmentRepository.save(assignment);
     }
 
