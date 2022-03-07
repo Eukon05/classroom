@@ -33,6 +33,24 @@ public class CourseController {
 
     }
 
+    @PutMapping("{id}")
+    public ResponseEntity<Object> updateCourse(Principal principal, @PathVariable int id, @RequestBody CourseDTO dto){
+
+        try{
+            courseService.updateCourse(principal.getName(), id, dto);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        }
+        catch (UserNotFoundException | CourseNotFoundException | MissingParametersException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex) {
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }
+
+    }
+
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deleteCourse(Principal principal, @PathVariable int id){
 
@@ -51,7 +69,7 @@ public class CourseController {
 
     }
 
-    @GetMapping(path = "{id}/assignments")
+    @GetMapping("{id}/assignments")
     public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int id){
 
         try{
@@ -68,7 +86,7 @@ public class CourseController {
 
     }
 
-    @PostMapping(path = "{id}/assignments")
+    @PostMapping("{id}/assignments")
     public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int id, @RequestBody AssignmentDTO dto){
 
         try{
@@ -86,7 +104,25 @@ public class CourseController {
 
     }
 
-    @DeleteMapping(path = "{id}/assignments/{assignmentId}")
+    @PutMapping("{id}/assignments/{assignmentId}")
+    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int id, @PathVariable int assignmentId, @RequestBody AssignmentDTO dto){
+
+        try{
+            courseService.updateAssignment(principal.getName(), id, assignmentId, dto);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        }
+        catch (UserNotFoundException | CourseNotFoundException | AssignmentNotFoundException | MissingParametersException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }
+
+    }
+
+    @DeleteMapping("{id}/assignments/{assignmentId}")
     public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int id, @PathVariable int assignmentId){
 
         try{
@@ -122,11 +158,11 @@ public class CourseController {
 
     }
 
-    @DeleteMapping("{id}/users")
-    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody AppUserDTO appUserDTO, @PathVariable int id){
+    @DeleteMapping("{id}/users/{username}")
+    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @PathVariable String username, @PathVariable int id){
 
         try{
-            courseService.deleteUserFromCourse(principal.getName(), appUserDTO.username, id);
+            courseService.deleteUserFromCourse(principal.getName(), username, id);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException ex){

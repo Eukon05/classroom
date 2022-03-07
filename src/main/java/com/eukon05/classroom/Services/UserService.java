@@ -35,7 +35,7 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void updateUser(AppUser user){
+    public void saveUser(AppUser user){
         appUserRepository.save(user);
     }
 
@@ -55,7 +55,6 @@ public class UserService implements UserDetailsService {
 
     }
 
-
     public AppUser getUserByUsername(String username) throws UserNotFoundException {
         Optional<AppUser> user = appUserRepository.findAppUserByUsername(username);
         if(user.isEmpty())
@@ -68,6 +67,26 @@ public class UserService implements UserDetailsService {
         try {return getUserByUsername(username);}
 
         catch (UserNotFoundException e){throw new UsernameNotFoundException(e.getMessage());}
+
+    }
+
+    public void updateUser(String username, AppUserDTO dto) throws UserNotFoundException, MissingParametersException {
+
+        AppUser user = getUserByUsername(username);
+
+        if(dto.name == null && dto.surname == null && dto.password == null)
+            throw new MissingParametersException();
+
+        if(dto.password!=null)
+            user.setPassword(passwordEncoder.encode(dto.password));
+
+        if(dto.name!=null)
+            user.setName(dto.name);
+
+        if(dto.surname!=null)
+            user.setName(dto.surname);
+
+        saveUser(user);
 
     }
 
@@ -87,7 +106,7 @@ public class UserService implements UserDetailsService {
             if (course.getAppUsers().isEmpty())
                 courseService.forceDeleteCourse(course);
             else
-                courseService.updateCourse(course);
+                courseService.saveCourse(course);
 
             appUserRepository.save(user);
 
@@ -112,7 +131,7 @@ public class UserService implements UserDetailsService {
         AppUser user = getUserByUsername(username);
         Course course = courseService.getCourseByInviteCode(inviteCode);
         appUserCourseRepository.save(addCourse(user, course, false));
-        courseService.updateCourse(course);
+        courseService.saveCourse(course);
         appUserRepository.save(user);
 
     }
@@ -150,7 +169,7 @@ public class UserService implements UserDetailsService {
             appUserCourseRepository.save(newTeacher);
         }
 
-        courseService.updateCourse(course);
+        courseService.saveCourse(course);
         appUserRepository.save(user);
 
     }

@@ -2,6 +2,7 @@ package com.eukon05.classroom.Services;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.AssignmentDTO;
+import com.eukon05.classroom.DTOs.CourseDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Assignment;
@@ -69,7 +70,7 @@ public class CourseService {
         courseRepository.save(course);
         appUserCourseRepository.save(userService.addCourse(appUser, course, true));
         courseRepository.save(course);
-        userService.updateUser(appUser);
+        userService.saveUser(appUser);
 
     }
 
@@ -87,10 +88,30 @@ public class CourseService {
             AppUserCourse appUserCourse = course.getAppUsers().get(i);
             AppUser user = appUserCourse.getAppUser();
             appUserCourseRepository.delete(userService.removeCourse(user, course));
-            userService.updateUser(user);
+            userService.saveUser(user);
         }
 
         forceDeleteCourse(course);
+
+    }
+
+    public void updateCourse(String username, int courseId, CourseDTO dto) throws CourseNotFoundException, UserNotFoundException, AccessDeniedException, MissingParametersException {
+
+        AppUser appUser = userService.getUserByUsername(username);
+        Course course = getCourseById(courseId);
+
+        AppUserCourse auc = getAppUserCourse(appUser, course);
+
+        if(auc==null || !auc.isTeacher())
+            throw new AccessDeniedException();
+
+        if(dto.name == null)
+            throw new MissingParametersException();
+
+        course.setName(dto.name);
+
+        saveCourse(course);
+
 
     }
 
@@ -122,6 +143,35 @@ public class CourseService {
             throw new AccessDeniedException();
 
         assignmentService.createAssignment(courseId, assignmentDTO.title, assignmentDTO.content, assignmentDTO.links);
+
+    }
+
+    public void updateAssignment(String username, int courseId, int assignmentId, AssignmentDTO dto)
+            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, MissingParametersException {
+
+        AppUser appUser = userService.getUserByUsername(username);
+        Course course = getCourseById(courseId);
+
+        AppUserCourse auc = getAppUserCourse(appUser, course);
+
+        if(auc==null || !auc.isTeacher())
+            throw new AccessDeniedException();
+
+        Assignment assignment = assignmentService.getAssignmentById(assignmentId);
+
+        if(dto.title == null && dto.content == null && dto.links == null)
+            throw new MissingParametersException();
+
+        if(dto.title != null)
+            assignment.setTitle(dto.title);
+
+        if(dto.content != null)
+            assignment.setContent(dto.content);
+
+        if(dto.links != null)
+            assignment.setLinks(dto.links);
+
+        assignmentService.saveAssignment(assignment);
 
     }
 
@@ -200,7 +250,7 @@ public class CourseService {
         return result.toString();
     }
 
-    public void updateCourse(Course course) {
+    public void saveCourse(Course course) {
         courseRepository.save(course);
     }
 

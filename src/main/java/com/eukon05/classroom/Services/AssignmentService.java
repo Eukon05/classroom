@@ -15,6 +15,17 @@ public class AssignmentService {
 
     private final AssignmentRepository assignmentRepository;
 
+    public Assignment getAssignmentById(int assignmentId) throws AssignmentNotFoundException {
+
+        Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
+
+        if(assignment.isEmpty())
+            throw new AssignmentNotFoundException();
+
+        return assignment.get();
+
+    }
+
     public List<Assignment> getAssignmentsForCourse(int courseID){
         return assignmentRepository.findAssignmentsByCourseID(courseID);
     }
@@ -38,5 +49,9 @@ public class AssignmentService {
 
         assignmentRepository.delete(assignment.get());
 
+    }
+
+    public void saveAssignment(Assignment assignment){
+        assignmentRepository.save(assignment);
     }
 }

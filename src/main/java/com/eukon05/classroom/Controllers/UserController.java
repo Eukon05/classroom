@@ -33,8 +33,35 @@ public class UserController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
     }
 
+    @GetMapping
+    public ResponseEntity<Object> getYourself(Principal principal){
+
+        try{
+            return new ResponseEntity<>(userService.getUserByUsername(principal.getName()), HttpStatus.OK);
+        }
+        catch (UserNotFoundException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @PutMapping("self")
+    public ResponseEntity<Object> updateYourself(Principal principal, @RequestBody AppUserDTO appUserDto){
+
+        try{
+            userService.updateUser(principal.getName(), appUserDto);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        }
+        catch (UserNotFoundException | MissingParametersException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
     @DeleteMapping("self")
-    public ResponseEntity<Object> deleteUser(Principal principal){
+    public ResponseEntity<Object> deleteYourself(Principal principal){
 
         try{
             userService.deleteUser(principal.getName());
@@ -50,7 +77,7 @@ public class UserController {
 
 
     @GetMapping("self/courses")
-    public ResponseEntity<Object> getUserCourses(Principal principal){
+    public ResponseEntity<Object> getYourCourses(Principal principal){
         try{
             return new ResponseEntity<>(userService.getUserCourses(principal.getName()), HttpStatus.OK);
         }
