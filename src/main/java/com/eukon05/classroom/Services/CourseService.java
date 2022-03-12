@@ -21,7 +21,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class CourseService {
+public class CourseService extends AbstractResourceService{
 
     private final CourseRepository courseRepository;
     private final AppUserCourseRepository appUserCourseRepository;
@@ -30,7 +30,9 @@ public class CourseService {
     @Setter
     private UserService userService;
 
-    public Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException {
+    public Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException {
+
+        valueCheck(inviteCode);
 
         Optional<Course> courseOptional = courseRepository.findCourseByInviteCode(inviteCode);
         if(courseOptional.isEmpty())
@@ -39,19 +41,25 @@ public class CourseService {
         
     }
 
-    public Course getCourseById(int id) throws CourseNotFoundException {
+    public Course getCourseById(int id) throws CourseNotFoundException, MissingParametersException {
+
+        valueCheck(id);
+
         Optional<Course> courseOptional = courseRepository.findById(id);
         if(courseOptional.isEmpty())
             throw new CourseNotFoundException();
         return courseOptional.get();
     }
     
-    public void createCourse(String username, String courseName) throws MissingParametersException, UserNotFoundException {
+    public void createCourse(String username, String courseName) throws MissingParametersException, UserNotFoundException, InvalidParametersException {
 
         if(courseName==null)
             throw new MissingParametersException();
 
         AppUser appUser = userService.getUserByUsername(username);
+
+        valueCheck(courseName);
+
         Course course = new Course(courseName);
         Optional<Course> tmp;
         String random;
@@ -64,7 +72,8 @@ public class CourseService {
 
         course.setInviteCode(random);
 
-        int id = (int) (courseRepository.count() + 1);
+        //It should be possible to simply generate the id with an annotation in the Course class, but this should work for now
+        int id = courseRepository.findMaxCourseId().orElse(1);
 
         course.setId(id);
         courseRepository.save(course);
@@ -74,7 +83,7 @@ public class CourseService {
 
     }
 
-    public void deleteCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException {
+    public void deleteCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
@@ -95,7 +104,7 @@ public class CourseService {
 
     }
 
-    public void updateCourse(String username, int courseId, CourseDTO dto) throws CourseNotFoundException, UserNotFoundException, AccessDeniedException, MissingParametersException {
+    public void updateCourse(String username, int courseId, CourseDTO dto) throws CourseNotFoundException, UserNotFoundException, AccessDeniedException, MissingParametersException, InvalidParametersException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
@@ -105,8 +114,7 @@ public class CourseService {
         if(auc==null || !auc.isTeacher())
             throw new AccessDeniedException();
 
-        if(dto.name == null)
-            throw new MissingParametersException();
+        valueCheck(dto.name);
 
         course.setName(dto.name);
 
@@ -116,7 +124,7 @@ public class CourseService {
     }
 
 
-    public List<Assignment> getAssignments(String username, int id) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException {
+    public List<Assignment> getAssignments(String username, int id) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(id);
@@ -129,13 +137,12 @@ public class CourseService {
     }
 
     public void createAssignment(String username, int courseId, AssignmentDTO assignmentDTO)
-            throws UserNotFoundException, CourseNotFoundException, MissingParametersException, AccessDeniedException {
+            throws UserNotFoundException, CourseNotFoundException, MissingParametersException, AccessDeniedException, InvalidParametersException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
-        if(assignmentDTO.title==null)
-            throw new MissingParametersException();
+        valueCheck(assignmentDTO.title);
 
         AppUserCourse auc = getAppUserCourse(appUser, course);
 
@@ -147,7 +154,7 @@ public class CourseService {
     }
 
     public void updateAssignment(String username, int courseId, int assignmentId, AssignmentDTO dto)
-            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, MissingParametersException {
+            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, MissingParametersException, InvalidParametersException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
@@ -176,10 +183,12 @@ public class CourseService {
     }
 
     public void deleteAssignment(String username, int courseId, int assignmentId)
-            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException {
+            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, InvalidParametersException, MissingParametersException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
+
+        valueCheck(assignmentId);
 
         AppUserCourse auc = getAppUserCourse(appUser, course);
 
@@ -189,7 +198,7 @@ public class CourseService {
         assignmentService.deleteAssignment(assignmentId);
     }
 
-    public List<AppUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException {
+    public List<AppUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException {
 
         AppUser appUser = userService.getUserByUsername(username);
         Course course = getCourseById(courseId);
@@ -213,7 +222,7 @@ public class CourseService {
 
     }
 
-    public void deleteUserFromCourse(String principalUsername, String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException {
+    public void deleteUserFromCourse(String principalUsername, String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
 
         AppUser appUser = userService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);

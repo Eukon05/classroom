@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService extends AbstractResourceService implements UserDetailsService {
 
     private final AppUserRepository appUserRepository;
     private final CourseService courseService;
@@ -40,14 +40,18 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public void createUser(AppUserDTO appUserDTO) throws MissingParametersException, UsernameTakenException {
+    public void createUser(AppUserDTO appUserDTO) throws MissingParametersException, UsernameTakenException, InvalidParametersException {
+
+        credentialCheck(appUserDTO.username);
+
         Optional<AppUser> tmpUser = appUserRepository.findAppUserByUsername(appUserDTO.username);
 
         if(tmpUser.isPresent())
             throw new UsernameTakenException(appUserDTO.username);
 
-        if(appUserDTO.username==null || appUserDTO.password==null || appUserDTO.name==null || appUserDTO.surname==null)
-            throw new MissingParametersException();
+        credentialCheck(appUserDTO.password);
+        valueCheck(appUserDTO.name);
+        valueCheck(appUserDTO.surname);
 
         AppUser user = new AppUser(appUserDTO.username, appUserDTO.password, appUserDTO.name, appUserDTO.surname);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -55,7 +59,10 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public AppUser getUserByUsername(String username) throws UserNotFoundException {
+    public AppUser getUserByUsername(String username) throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+
+        credentialCheck(username);
+
         Optional<AppUser> user = appUserRepository.findAppUserByUsername(username);
         if(user.isEmpty())
             throw new UserNotFoundException(username);
@@ -66,19 +73,21 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {return getUserByUsername(username);}
 
-        catch (UserNotFoundException e){throw new UsernameNotFoundException(e.getMessage());}
+        catch (UserNotFoundException | InvalidParametersException | MissingParametersException e){throw new UsernameNotFoundException(e.getMessage());}
 
     }
 
-    public void updateUser(String username, AppUserDTO dto) throws UserNotFoundException, MissingParametersException {
+    public void updateUser(String username, AppUserDTO dto) throws UserNotFoundException, MissingParametersException, InvalidParametersException {
 
         AppUser user = getUserByUsername(username);
 
         if(dto.name == null && dto.surname == null && dto.password == null)
             throw new MissingParametersException();
 
-        if(dto.password!=null)
+        if((dto.password!=null)) {
+            credentialCheck(dto.password);
             user.setPassword(passwordEncoder.encode(dto.password));
+        }
 
         if(dto.name!=null)
             user.setName(dto.name);
@@ -90,7 +99,7 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public void deleteUser(String username) throws UserNotFoundException {
+    public void deleteUser(String username) throws UserNotFoundException, MissingParametersException, InvalidParametersException {
 
         AppUser user = getUserByUsername(username);
         List<Course> courses = new ArrayList<>();
@@ -116,7 +125,8 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public List<Course> getUserCourses(String username) throws UserNotFoundException {
+    public List<Course> getUserCourses(String username) throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+
         AppUser user = getUserByUsername(username);
         List<Course> courses = new ArrayList<>();
 
@@ -127,8 +137,12 @@ public class UserService implements UserDetailsService {
         return courses;
     }
 
-    public void joinCourse(String username, String inviteCode) throws UserNotFoundException, CourseNotFoundException {
+    public void joinCourse(String username, String inviteCode) throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, MissingParametersException {
+
         AppUser user = getUserByUsername(username);
+
+        valueCheck(inviteCode);
+
         Course course = courseService.getCourseByInviteCode(inviteCode);
         appUserCourseRepository.save(addCourse(user, course, false));
         courseService.saveCourse(course);
@@ -136,9 +150,12 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException {
+    public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
 
         AppUser user = getUserByUsername(username);
+
+        valueCheck(courseId);
+
         Course course = courseService.getCourseById(courseId);
 
         AppUserCourse auc = removeCourse(user, course);
@@ -199,5 +216,7 @@ public class UserService implements UserDetailsService {
 
         return null;
     }
+
+
 
 }

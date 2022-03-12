@@ -25,7 +25,7 @@ public class UserController {
         try{
             userService.createUser(appUserDto);
         }
-        catch (UsernameTakenException | MissingParametersException ex){
+        catch (UsernameTakenException | MissingParametersException | InvalidParametersException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -39,7 +39,7 @@ public class UserController {
         try{
             return new ResponseEntity<>(userService.getUserByUsername(principal.getName()), HttpStatus.OK);
         }
-        catch (UserNotFoundException ex){
+        catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -53,7 +53,7 @@ public class UserController {
             userService.updateUser(principal.getName(), appUserDto);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch (UserNotFoundException | MissingParametersException ex){
+        catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -67,7 +67,7 @@ public class UserController {
             userService.deleteUser(principal.getName());
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch (UserNotFoundException ex){
+        catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -81,7 +81,7 @@ public class UserController {
         try{
             return new ResponseEntity<>(userService.getUserCourses(principal.getName()), HttpStatus.OK);
         }
-        catch(UserNotFoundException ex){
+        catch(UserNotFoundException | MissingParametersException | InvalidParametersException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -93,7 +93,7 @@ public class UserController {
             userService.joinCourse(principal.getName(), courseDTO.inviteCode);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
-        catch(UserNotFoundException | CourseNotFoundException ex){
+        catch(UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -104,7 +104,7 @@ public class UserController {
         try {
             userService.leaveCourse(principal.getName(), id);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        } catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException ex) {
+        } catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException | MissingParametersException | InvalidParametersException ex) {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
