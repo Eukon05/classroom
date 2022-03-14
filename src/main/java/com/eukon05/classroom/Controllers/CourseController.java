@@ -1,5 +1,6 @@
 package com.eukon05.classroom.Controllers;
 
+import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.DTOs.CourseDTO;
 import com.eukon05.classroom.Exceptions.*;
@@ -43,7 +44,7 @@ public class CourseController {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (AccessDeniedException ex) {
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex) {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -61,7 +62,7 @@ public class CourseController {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (AccessDeniedException ex){
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -78,7 +79,7 @@ public class CourseController {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (AccessDeniedException ex){
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -96,7 +97,7 @@ public class CourseController {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (AccessDeniedException ex){
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -114,7 +115,7 @@ public class CourseController {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (AccessDeniedException ex){
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -132,10 +133,29 @@ public class CourseController {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (AccessDeniedException ex){
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
+
+    }
+
+    @PutMapping("{id}/users")
+    public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int id, @RequestBody AppUserDTO dto){
+
+        try{
+            courseService.updateUserRoleInCourse(principal.getName(), id, dto.username, dto.isTeacher);
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        }
+        catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }
+
 
     }
 
@@ -149,7 +169,7 @@ public class CourseController {
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (AccessDeniedException ex){
+        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
             ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -157,11 +177,11 @@ public class CourseController {
 
     }
 
-    @DeleteMapping("{id}/users/{username}")
-    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @PathVariable String username, @PathVariable int id){
+    @DeleteMapping("{id}/users")
+    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody AppUserDTO dto, @PathVariable int id){
 
         try{
-            courseService.deleteUserFromCourse(principal.getName(), username, id);
+            courseService.deleteUserFromCourse(principal.getName(), dto.username, id);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException | MissingParametersException | InvalidParametersException ex){
