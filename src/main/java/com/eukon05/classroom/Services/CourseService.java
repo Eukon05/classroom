@@ -30,7 +30,7 @@ public class CourseService extends AbstractResourceService{
     @Setter
     private UserService userService;
 
-    public Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException {
+    Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException {
 
         valueCheck(inviteCode);
 
@@ -41,7 +41,7 @@ public class CourseService extends AbstractResourceService{
         
     }
 
-    public Course getCourseById(int id) throws CourseNotFoundException, MissingParametersException {
+    Course getCourseById(int id) throws CourseNotFoundException, MissingParametersException {
 
         valueCheck(id);
 
@@ -256,6 +256,10 @@ public class CourseService extends AbstractResourceService{
 
         userService.leaveCourse(username, courseId);
     }
+
+    //-------------------------------------------------------------------------------
+    //INTERNAL METHODS
+    //-------------------------------------------------------------------------------
 
     private AppUserCourse getAppUserCourse(AppUser appUser, Course course) throws UserNotAttendingTheCourseException {
 

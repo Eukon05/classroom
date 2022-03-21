@@ -35,7 +35,7 @@ public class UserService extends AbstractResourceService implements UserDetailsS
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void saveUser(AppUser user){
+    void saveUser(AppUser user){
         appUserRepository.save(user);
     }
 
@@ -93,7 +93,7 @@ public class UserService extends AbstractResourceService implements UserDetailsS
             user.setName(dto.name);
 
         if(dto.surname!=null)
-            user.setName(dto.surname);
+            user.setSurname(dto.surname);
 
         saveUser(user);
 
@@ -114,10 +114,24 @@ public class UserService extends AbstractResourceService implements UserDetailsS
 
             if (course.getAppUsers().isEmpty())
                 courseService.forceDeleteCourse(course);
-            else
-                courseService.saveCourse(course);
+            else {
 
-            appUserRepository.save(user);
+                boolean courseStillHasATeacher = false;
+
+                for(AppUserCourse auc2 : course.getAppUsers()){
+                    if(auc2.isTeacher()) {
+                        courseStillHasATeacher = true;
+                        break;
+                    }
+                }
+
+                if(!courseStillHasATeacher){
+                    AppUserCourse newTeacher = course.getAppUsers().get(0);
+                    newTeacher.setTeacher(true);
+                    appUserCourseRepository.save(newTeacher);
+                }
+
+            }
 
         }
 
@@ -167,7 +181,6 @@ public class UserService extends AbstractResourceService implements UserDetailsS
 
         if(course.getAppUsers().isEmpty()) {
             courseService.forceDeleteCourse(course);
-            appUserRepository.save(user);
             return;
         }
 
@@ -186,14 +199,11 @@ public class UserService extends AbstractResourceService implements UserDetailsS
             appUserCourseRepository.save(newTeacher);
         }
 
-        courseService.saveCourse(course);
-        appUserRepository.save(user);
-
     }
 
 
 
-    public AppUserCourse addCourse(AppUser user, Course course, boolean isTeacher){
+    AppUserCourse addCourse(AppUser user, Course course, boolean isTeacher){
         AppUserCourse appUserCourse = new AppUserCourse(user, course, isTeacher);
         user.getCourses().add(appUserCourse);
         course.getAppUsers().add(appUserCourse);
@@ -202,7 +212,7 @@ public class UserService extends AbstractResourceService implements UserDetailsS
     }
 
 
-    public AppUserCourse removeCourse(AppUser user, Course course){
+    AppUserCourse removeCourse(AppUser user, Course course){
 
         for(AppUserCourse appUserCourse : user.getCourses()){
             if(appUserCourse.getCourse().equals(course) && appUserCourse.getAppUser().equals(user)){

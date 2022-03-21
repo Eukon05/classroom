@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.*;
 
-@JsonIgnoreProperties(value="password")
+@JsonIgnoreProperties(value={"password", "courses", "credentialsNonExpired", "accountNonExpired", "enabled", "authorities", "accountNonLocked"})
 @Getter
 @Setter
 @NoArgsConstructor

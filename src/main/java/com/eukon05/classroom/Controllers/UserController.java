@@ -33,7 +33,7 @@ public class UserController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("self")
     public ResponseEntity<Object> getYourself(Principal principal){
 
         try{
