@@ -11,12 +11,11 @@ public class Utils {
 
     private static final Algorithm algorithm = Algorithm.HMAC256("TJA7wIo8os");
 
-    public static String verifyTokenAndGetUsername(String authorization){
+    public static DecodedJWT verifyAndReturnToken(String authorization){
 
         authorization = authorization.replace("Bearer ", "");
         JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT decodedJWT = verifier.verify(authorization);
-        return decodedJWT.getSubject();
+        return verifier.verify(authorization);
 
     }
 
@@ -24,21 +23,19 @@ public class Utils {
         return JWT.create()
                 .withSubject(username)
                 .withIssuer(issuer)
+                .withClaim("type", "access")
                 .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
                 .sign(algorithm);
     }
 
-    /* I don't see a reason to use a refresh token in the current state of the app, however the code for it is ready, waiting to be uncommented
-
     public static String createRefreshToken(String username, String issuer){
-        String refresh_token = JWT.create()
+
+        return JWT.create()
                 .withSubject(username)
                 .withIssuer(issuer)
+                .withClaim("type", "refresh")
                 .withExpiresAt(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
                 .sign(algorithm);
-
-        return refresh_token;
     }
 
-    */
 }

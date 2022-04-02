@@ -24,6 +24,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+    //Code copied from my previous project, "Leopard"
+
     private final AuthenticationManager authenticationManager;
 
     @Override
@@ -54,7 +56,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         Map<String, String> tokens = new HashMap<>();
         tokens.put("access_token", Utils.createAccessToken(user.getUsername(), request.getRequestURL().toString()));
-        //tokens.put("refresh_token", SecurityUtils.createRefreshToken(user.getUsername(), request.getRequestURL().toString()));
+        tokens.put("refresh_token", Utils.createRefreshToken(user.getUsername(), request.getRequestURL().toString()));
 
         response.setContentType(APPLICATION_JSON_VALUE);
         response.getWriter().write(new Gson().toJson(tokens));
