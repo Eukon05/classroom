@@ -1,129 +1,151 @@
 package com.eukon05.classroom;
 
+
 import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.Domains.AppUser;
+import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Course;
 import com.eukon05.classroom.Exceptions.*;
+import com.eukon05.classroom.Repositories.AppUserCourseRepository;
 import com.eukon05.classroom.Repositories.AppUserRepository;
-import com.eukon05.classroom.Repositories.AssignmentRepository;
 import com.eukon05.classroom.Repositories.CourseRepository;
+import com.eukon05.classroom.Services.AssignmentService;
 import com.eukon05.classroom.Services.CourseService;
 import com.eukon05.classroom.Services.UserService;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Component
+public class UserServiceTests {
 
-@SpringBootTest
-public class UserServiceTests extends AbstractTests{
+    private UserService userService;
+    private AppUserRepository appUserRepository;
+    private AppUserCourseRepository aucRepository;
+    private CourseService courseService;
+    private CourseRepository courseRepository;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @Autowired
-    public UserServiceTests(AppUserRepository userRepository,
-                            CourseRepository courseRepository,
-                            AssignmentRepository assignmentRepository,
-                            CourseService courseService,
-                            UserService userService) {
-        super(userRepository, courseRepository, assignmentRepository, courseService, userService);
+    private static final AppUserDTO userOneDto = new AppUserDTO();
+
+    @BeforeAll
+    static void initDto(){
+        userOneDto.username = "testOne";
+        userOneDto.password = "drowssap";
+        userOneDto.name = "Test";
+        userOneDto.surname = "One";
     }
 
-    @Test
-    void createUserTest() throws InvalidParametersException, UsernameTakenException, MissingParametersException {
+    @BeforeEach
+    void initService(){
 
-        userService.createUser(userOneDTO);
-        assertTrue(userRepository.findAppUserByUsername(userOneDTO.username).isPresent());
+        appUserRepository = Mockito.mock(AppUserRepository.class);
+        aucRepository = Mockito.mock(AppUserCourseRepository.class);
+        courseRepository = Mockito.mock(CourseRepository.class);
+        courseService = Mockito.spy(new CourseService(courseRepository, aucRepository, Mockito.mock(AssignmentService.class)));
 
-    }
-
-    @Test
-    void updateUserTest() throws InvalidParametersException, UsernameTakenException, MissingParametersException, UserNotFoundException {
-
-        createUserTest();
-        AppUserDTO dto = new AppUserDTO();
-        dto.name = "Update";
-        dto.surname = "Test";
-        dto.password = "newPass";
-
-        userService.updateUser(userOneDTO.username, dto);
-        AppUser user = userRepository.findAppUserByUsername(userOneDTO.username).get();
-
-        assertEquals(user.getName(), dto.name);
-        assertEquals(user.getSurname(), dto.surname);
-        assertTrue(new BCryptPasswordEncoder().matches(dto.password, user.getPassword()));
+        userService = new UserService(appUserRepository, aucRepository, courseService, passwordEncoder);
 
     }
 
     @Test
-    @Transactional
-    void deleteUserTest() throws InvalidParametersException, UsernameTakenException, MissingParametersException, UserNotFoundException, CourseNotFoundException {
+    void create_user_test() throws InvalidParametersException, UsernameTakenException, MissingParametersException {
 
-        //creates two users
-        createUserTest();
-        userService.createUser(userTwoDTO);
-
-        //creates a course for them to join
-        courseService.createCourse(userOneDTO.username, "testcourse");
-
-        //checks if the course exists
-        List<Course> courses = userService.getUserCourses(userOneDTO.username);
-        assertTrue(!courses.isEmpty() && courses.get(0).getName().equals("testcourse"));
-
-        //joins the course on the second user's account
-        userService.joinCourse(userTwoDTO.username, courses.get(0).getInviteCode());
-
-        //checks if the user joined the course
-        courses = userService.getUserCourses(userTwoDTO.username);
-        assertTrue(!courses.isEmpty() && courses.get(0).getName().equals("testcourse"));
-        assertEquals(courses.get(0).getAppUsers().size(), 2);
-
-        //deletes the user
-        userService.deleteUser(userOneDTO.username);
-        assertTrue(userRepository.findAppUserByUsername(userOneDTO.username).isEmpty());
-
-        //checks if the course ownership has been transferred to the second user
-        courses = userService.getUserCourses(userTwoDTO.username);
-        assertEquals(courses.get(0).getAppUsers().size(), 1);
-        assertTrue(courses.get(0).getAppUsers().get(0).isTeacher());
-
+        userService.createUser(userOneDto);
+        Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
 
     }
 
     @Test
-    @Transactional
-    void leaveCourseTest() throws UserNotFoundException, InvalidParametersException, MissingParametersException, CourseNotFoundException, UserNotAttendingTheCourseException, UsernameTakenException {
+    void get_user_by_username_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
 
-        //creates two users
-        createUserTest();
-        userService.createUser(userTwoDTO);
+        Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
+                .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
 
-        //creates a course for them to join
-        courseService.createCourse(userOneDTO.username, "testcourse");
+        assertEquals(userService.getUserByUsername("testOne").getName(), "Test");
 
-        //checks if the course exists
-        List<Course> courses = userService.getUserCourses(userOneDTO.username);
-        assertTrue(!courses.isEmpty() && courses.get(0).getName().equals("testcourse"));
-
-        //joins the course on the second user's account
-        userService.joinCourse(userTwoDTO.username, courses.get(0).getInviteCode());
-
-        //checks if the user joined the course
-        courses = userService.getUserCourses(userTwoDTO.username);
-        assertTrue(!courses.isEmpty() && courses.get(0).getName().equals("testcourse"));
-        assertEquals(courses.get(0).getAppUsers().size(), 2);
-
-        //user one leaves the course
-        userService.leaveCourse(userOneDTO.username, courses.get(0).getId());
-        assertTrue(userService.getUserCourses(userOneDTO.username).isEmpty());
-
-        //checks if the course ownership has been transferred to the second user
-        courses = userService.getUserCourses(userTwoDTO.username);
-        assertEquals(courses.get(0).getAppUsers().size(), 1);
-        assertTrue(courses.get(0).getAppUsers().get(0).isTeacher());
     }
+
+    @Test
+    void update_user_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+
+        Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
+                .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
+
+        AppUserDTO updatedDto = new AppUserDTO();
+        updatedDto.password = "password";
+
+        userService.updateUser("testOne", updatedDto);
+        Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
+
+    }
+
+    @Test
+    void get_user_courses_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+
+        AppUser test = new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname);
+        test.getCourses().add(new AppUserCourse(test, new Course("course"), false));
+
+        Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
+                .thenReturn(Optional.of(test));
+
+        assertFalse(userService.getUserCourses("testOne").isEmpty());
+        assertEquals(userService.getUserCourses("testOne").get(0).getName(), "course");
+
+    }
+
+    @Test
+    void join_course_test() throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, MissingParametersException {
+
+        Course testCourse = new Course("TestCourse");
+        testCourse.setId(1);
+
+        Mockito.when(courseRepository.findCourseByInviteCode("invitecode"))
+                .thenReturn(Optional.of(testCourse));
+
+        Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
+                .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
+
+        userService.joinCourse("testOne", "invitecode");
+
+        Mockito.verify(aucRepository).save(Mockito.any(AppUserCourse.class));
+        Mockito.verify(courseService).saveCourse(Mockito.any(Course.class));
+        Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
+
+    }
+
+    @Test
+    void leave_course_test() throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
+
+        AppUser test = new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname);
+
+        Course testCourse = new Course("TestCourse");
+        testCourse.setId(1);
+
+        AppUserCourse auc = new AppUserCourse(test, testCourse, false);
+
+        test.getCourses().add(auc);
+        testCourse.getAppUsers().add(auc);
+
+        Mockito.when(courseRepository.findById(1))
+                .thenReturn(Optional.of(testCourse));
+
+        Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
+                .thenReturn(Optional.of(test));
+
+        userService.leaveCourse("testOne", testCourse.getId());
+        Mockito.verify(aucRepository).delete(Mockito.any(AppUserCourse.class));
+        Mockito.verify(courseService).forceDeleteCourse(Mockito.any(Course.class));
+
+    }
+
 
 }

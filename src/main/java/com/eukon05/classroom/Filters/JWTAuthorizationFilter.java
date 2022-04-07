@@ -19,15 +19,14 @@ import java.util.Map;
 @Component
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
-    //Code copied from my previous project, "Leopard"
-
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
         if(httpServletRequest.getServletPath().equals("/api/v1/authenticate") ||
            httpServletRequest.getServletPath().equals("/api/v1/refresh") ||
            httpServletRequest.getServletPath().equals("/api/v1/users"))
-            filterChain.doFilter(httpServletRequest, httpServletResponse);
+                filterChain.doFilter(httpServletRequest, httpServletResponse);
+
         else{
             String auth = httpServletRequest.getHeader("Authorization");
             if(auth!=null && auth.startsWith("Bearer ")){
