@@ -39,7 +39,6 @@ public class UserService extends AbstractResourceService implements UserDetailsS
         appUserRepository.save(user);
     }
 
-
     public void createUser(AppUserDTO appUserDTO) throws MissingParametersException, UsernameTakenException, InvalidParametersException {
 
         credentialCheck(appUserDTO.username);

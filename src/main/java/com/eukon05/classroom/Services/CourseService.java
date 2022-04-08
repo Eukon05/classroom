@@ -1,16 +1,13 @@
 package com.eukon05.classroom.Services;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
-import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.DTOs.CourseDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
-import com.eukon05.classroom.Domains.Assignment;
 import com.eukon05.classroom.Domains.Course;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Repositories.AppUserCourseRepository;
 import com.eukon05.classroom.Repositories.CourseRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +17,24 @@ import java.util.Optional;
 import java.util.Random;
 
 @Service
-@RequiredArgsConstructor
 public class CourseService extends AbstractResourceService{
 
     private final CourseRepository courseRepository;
     private final AppUserCourseRepository appUserCourseRepository;
     private final AssignmentService assignmentService;
-
-    @Setter
     private UserService userService;
+
+    public CourseService(CourseRepository courseRepository, AppUserCourseRepository appUserCourseRepository, AssignmentService assignmentService){
+        this.courseRepository=courseRepository;
+        this.appUserCourseRepository=appUserCourseRepository;
+        this.assignmentService=assignmentService;
+        this.assignmentService.setCourseService(this);
+    }
+
+    void setUserService(UserService userService){
+        this.userService=userService;
+        this.assignmentService.setUserService(userService);
+    }
 
     Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException {
 
@@ -121,79 +127,6 @@ public class CourseService extends AbstractResourceService{
     }
 
 
-    public List<Assignment> getAssignments(String username, int id) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
-
-        AppUser appUser = userService.getUserByUsername(username);
-        Course course = getCourseById(id);
-
-        getAppUserCourse(appUser, course);
-
-        return assignmentService.getAssignmentsForCourse(id);
-
-    }
-
-    public void createAssignment(String username, int courseId, AssignmentDTO assignmentDTO)
-            throws UserNotFoundException, CourseNotFoundException, MissingParametersException, AccessDeniedException, InvalidParametersException, UserNotAttendingTheCourseException {
-
-        AppUser appUser = userService.getUserByUsername(username);
-        Course course = getCourseById(courseId);
-
-        valueCheck(assignmentDTO.title);
-
-        AppUserCourse auc = getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher())
-            throw new AccessDeniedException();
-
-        assignmentService.createAssignment(courseId, assignmentDTO.title, assignmentDTO.content, assignmentDTO.links);
-
-    }
-
-    public void updateAssignment(String username, int courseId, int assignmentId, AssignmentDTO dto)
-            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, MissingParametersException, InvalidParametersException, UserNotAttendingTheCourseException {
-
-        AppUser appUser = userService.getUserByUsername(username);
-        Course course = getCourseById(courseId);
-
-        AppUserCourse auc = getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher())
-            throw new AccessDeniedException();
-
-        Assignment assignment = assignmentService.getAssignmentById(assignmentId);
-
-        if(dto.title == null && dto.content == null && dto.links == null)
-            throw new MissingParametersException();
-
-        if(dto.title != null)
-            assignment.setTitle(dto.title);
-
-        if(dto.content != null)
-            assignment.setContent(dto.content);
-
-        if(dto.links != null)
-            assignment.setLinks(dto.links);
-
-        assignmentService.saveAssignment(assignment);
-
-    }
-
-    public void deleteAssignment(String username, int courseId, int assignmentId)
-            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
-
-        AppUser appUser = userService.getUserByUsername(username);
-        Course course = getCourseById(courseId);
-
-        valueCheck(assignmentId);
-
-        AppUserCourse auc = getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher())
-            throw new AccessDeniedException();
-
-        assignmentService.deleteAssignment(assignmentId);
-    }
-
     public List<AppUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
 
         AppUser appUser = userService.getUserByUsername(username);
@@ -229,8 +162,6 @@ public class CourseService extends AbstractResourceService{
 
         AppUser tmpAppUser = userService.getUserByUsername(username);
 
-        //Maybe this check is happening too late?
-        //I should consider doing it at the beginning of the method, but it will work for now
         if(appUser.equals(tmpAppUser))
             throw new InvalidParametersException();
 
@@ -261,7 +192,7 @@ public class CourseService extends AbstractResourceService{
     //INTERNAL METHODS
     //-------------------------------------------------------------------------------
 
-    private AppUserCourse getAppUserCourse(AppUser appUser, Course course) throws UserNotAttendingTheCourseException {
+    AppUserCourse getAppUserCourse(AppUser appUser, Course course) throws UserNotAttendingTheCourseException {
 
         for(AppUserCourse auc : course.getAppUsers()){
             if(auc.getAppUser().equals(appUser)){
@@ -285,11 +216,11 @@ public class CourseService extends AbstractResourceService{
         return result.toString();
     }
 
-    public void saveCourse(Course course) {
+    void saveCourse(Course course) {
         courseRepository.save(course);
     }
 
-    public void forceDeleteCourse(Course course) {
+    void forceDeleteCourse(Course course) {
         courseRepository.delete(course);
         assignmentService.deleteAllAssignmentsFromCourse(course.getId());
     }

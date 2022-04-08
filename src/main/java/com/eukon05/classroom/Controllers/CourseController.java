@@ -27,7 +27,6 @@ public class CourseController {
             return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
         }
         catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
@@ -41,11 +40,9 @@ public class CourseController {
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (AccessDeniedException | UserNotAttendingTheCourseException ex) {
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
@@ -59,86 +56,14 @@ public class CourseController {
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | InvalidParametersException | MissingParametersException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }
 
-    @GetMapping("{id}/assignments")
-    public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int id){
-
-        try{
-            return new ResponseEntity<>(courseService.getAssignments(principal.getName(), id), HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | InvalidParametersException | MissingParametersException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
-
-    }
-
-    @PostMapping("{id}/assignments")
-    public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int id, @RequestBody AssignmentDTO dto){
-
-        try{
-            courseService.createAssignment(principal.getName(), id, dto);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
-        }
-        catch (UserNotFoundException | MissingParametersException | CourseNotFoundException | InvalidParametersException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
-
-    }
-
-    @PutMapping("{id}/assignments/{assignmentId}")
-    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int id, @PathVariable int assignmentId, @RequestBody AssignmentDTO dto){
-
-        try{
-            courseService.updateAssignment(principal.getName(), id, assignmentId, dto);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | AssignmentNotFoundException | MissingParametersException | InvalidParametersException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
-
-    }
-
-    @DeleteMapping("{id}/assignments/{assignmentId}")
-    public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int id, @PathVariable int assignmentId){
-
-        try{
-            courseService.deleteAssignment(principal.getName(), id, assignmentId);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | AssignmentNotFoundException | MissingParametersException | InvalidParametersException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
-
-    }
 
     @PutMapping("{id}/users")
     public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int id, @RequestBody AppUserDTO dto){
@@ -148,11 +73,9 @@ public class CourseController {
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
@@ -166,11 +89,9 @@ public class CourseController {
             return new ResponseEntity<>(courseService.getCourseUsers(principal.getName(), id), HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 
@@ -185,11 +106,9 @@ public class CourseController {
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException | MissingParametersException | InvalidParametersException ex){
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (AccessDeniedException ex) {
-            ex.printStackTrace();
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
 

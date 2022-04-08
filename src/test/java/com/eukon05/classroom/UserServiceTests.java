@@ -117,7 +117,7 @@ public class UserServiceTests {
         userService.joinCourse("testOne", "invitecode");
 
         Mockito.verify(aucRepository).save(Mockito.any(AppUserCourse.class));
-        Mockito.verify(courseService).saveCourse(Mockito.any(Course.class));
+        //Mockito.verify(courseService).saveCourse(Mockito.any(Course.class));
         Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
 
     }
@@ -143,7 +143,7 @@ public class UserServiceTests {
 
         userService.leaveCourse("testOne", testCourse.getId());
         Mockito.verify(aucRepository).delete(Mockito.any(AppUserCourse.class));
-        Mockito.verify(courseService).forceDeleteCourse(Mockito.any(Course.class));
+        //Mockito.verify(courseService).forceDeleteCourse(Mockito.any(Course.class));
 
     }
 
