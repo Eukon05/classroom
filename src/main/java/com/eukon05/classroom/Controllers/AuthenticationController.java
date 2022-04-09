@@ -1,6 +1,7 @@
 package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
+import com.eukon05.classroom.DTOs.CredentialsDTO;
 import com.eukon05.classroom.Exceptions.InvalidParametersException;
 import com.eukon05.classroom.Exceptions.MissingParametersException;
 import com.eukon05.classroom.Utils;
@@ -28,7 +29,7 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping
-    ResponseEntity<Object> authenticate(@RequestBody AppUserDTO dto, HttpServletRequest request) {
+    ResponseEntity<Object> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request) {
 
         if(dto.username == null || dto.password == null)
             return new ResponseEntity<>(InvalidParametersException.message, HttpStatus.BAD_REQUEST);

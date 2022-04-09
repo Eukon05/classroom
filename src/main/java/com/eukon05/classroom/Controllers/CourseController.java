@@ -1,8 +1,6 @@
 package com.eukon05.classroom.Controllers;
 
-import com.eukon05.classroom.DTOs.AppUserDTO;
-import com.eukon05.classroom.DTOs.AssignmentDTO;
-import com.eukon05.classroom.DTOs.CourseDTO;
+import com.eukon05.classroom.DTOs.*;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.CourseService;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +18,10 @@ public class CourseController {
     private final CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<Object> createCourse(Principal principal, @RequestBody CourseDTO courseDTO){
+    public ResponseEntity<Object> createCourse(Principal principal, @RequestBody CourseDataDTO dto){
 
         try{
-            courseService.createCourse(principal.getName(), courseDTO.name);
+            courseService.createCourse(principal.getName(), dto.name);
             return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
         }
         catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
@@ -33,10 +31,10 @@ public class CourseController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updateCourse(Principal principal, @PathVariable int id, @RequestBody CourseDTO dto){
+    public ResponseEntity<Object> updateCourse(Principal principal, @PathVariable int id, @RequestBody CourseDataDTO dto){
 
         try{
-            courseService.updateCourse(principal.getName(), id, dto);
+            courseService.updateCourse(principal.getName(), id, dto.name);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
@@ -66,7 +64,7 @@ public class CourseController {
 
 
     @PutMapping("{id}/users")
-    public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int id, @RequestBody AppUserDTO dto){
+    public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int id, @RequestBody CourseUserUpdateDTO dto){
 
         try{
             courseService.updateUserRoleInCourse(principal.getName(), id, dto.username, dto.isTeacher);
@@ -99,7 +97,7 @@ public class CourseController {
     }
 
     @DeleteMapping("{id}/users")
-    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody AppUserDTO dto, @PathVariable int id){
+    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody CourseUserDeleteDTO dto, @PathVariable int id){
 
         try{
             courseService.deleteUserFromCourse(principal.getName(), dto.username, id);

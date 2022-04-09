@@ -1,6 +1,7 @@
 package com.eukon05.classroom.Services;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
+import com.eukon05.classroom.DTOs.AppUserUpdateDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Course;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService extends AbstractResourceService implements UserDetailsService {
+public class AppUserService extends AbstractResourceService implements UserDetailsService {
 
     private final AppUserRepository appUserRepository;
     private final CourseService courseService;
@@ -27,7 +28,7 @@ public class UserService extends AbstractResourceService implements UserDetailsS
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(AppUserRepository repository, AppUserCourseRepository appUserCourseRepository, CourseService courseService, PasswordEncoder passwordEncoder){
+    public AppUserService(AppUserRepository repository, AppUserCourseRepository appUserCourseRepository, CourseService courseService, PasswordEncoder passwordEncoder){
         appUserRepository=repository;
         this.appUserCourseRepository=appUserCourseRepository;
         this.courseService=courseService;
@@ -76,7 +77,7 @@ public class UserService extends AbstractResourceService implements UserDetailsS
 
     }
 
-    public void updateUser(String username, AppUserDTO dto) throws UserNotFoundException, MissingParametersException, InvalidParametersException {
+    public void updateUser(String username, AppUserUpdateDTO dto) throws UserNotFoundException, MissingParametersException, InvalidParametersException {
 
         AppUser user = getUserByUsername(username);
 

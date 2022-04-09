@@ -1,6 +1,7 @@
 package com.eukon05.classroom.Services;
 
 import com.eukon05.classroom.DTOs.AssignmentDTO;
+import com.eukon05.classroom.DTOs.AssignmentDataDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Assignment;
@@ -21,7 +22,7 @@ public class AssignmentService extends AbstractResourceService{
     private final AssignmentRepository assignmentRepository;
 
     @Setter
-    private UserService userService;
+    private AppUserService appUserService;
 
     @Setter
     private CourseService courseService;
@@ -29,7 +30,7 @@ public class AssignmentService extends AbstractResourceService{
 
     public List<Assignment> getAssignmentsForCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
 
-        AppUser appUser = userService.getUserByUsername(username);
+        AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
         courseService.getAppUserCourse(appUser, course);
@@ -38,28 +39,28 @@ public class AssignmentService extends AbstractResourceService{
 
     }
 
-    public void createAssignment(String username, int courseId, AssignmentDTO assignmentDTO)
+    public void createAssignment(String username, int courseId, AssignmentDataDTO dto)
             throws UserNotFoundException, CourseNotFoundException, MissingParametersException, AccessDeniedException, InvalidParametersException, UserNotAttendingTheCourseException {
 
-        AppUser appUser = userService.getUserByUsername(username);
+        AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        valueCheck(assignmentDTO.title);
+        valueCheck(dto.title);
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
 
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        Assignment assignment = new Assignment(assignmentDTO.title, assignmentDTO.content, assignmentDTO.links, courseId);
+        Assignment assignment = new Assignment(dto.title, dto.content, dto.links, courseId);
         assignmentRepository.save(assignment);
 
     }
 
-    public void updateAssignment(String username, int courseId, int assignmentId, AssignmentDTO dto)
+    public void updateAssignment(String username, int courseId, int assignmentId, AssignmentDataDTO dto)
             throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, MissingParametersException, InvalidParametersException, UserNotAttendingTheCourseException {
 
-        AppUser appUser = userService.getUserByUsername(username);
+        AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
@@ -88,7 +89,7 @@ public class AssignmentService extends AbstractResourceService{
     public void deleteAssignment(String username, int courseId, int assignmentId)
             throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
 
-        AppUser appUser = userService.getUserByUsername(username);
+        AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
         valueCheck(assignmentId);

@@ -1,9 +1,10 @@
 package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
+import com.eukon05.classroom.DTOs.AppUserUpdateDTO;
 import com.eukon05.classroom.DTOs.CourseDTO;
 import com.eukon05.classroom.Exceptions.*;
-import com.eukon05.classroom.Services.UserService;
+import com.eukon05.classroom.Services.AppUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,13 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final AppUserService appUserService;
 
     @PostMapping
     public ResponseEntity<Object> createUser(@RequestBody AppUserDTO appUserDto){
 
         try{
-            userService.createUser(appUserDto);
+            appUserService.createUser(appUserDto);
         }
         catch (UsernameTakenException | MissingParametersException | InvalidParametersException ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -36,7 +37,7 @@ public class UserController {
     public ResponseEntity<Object> getYourself(Principal principal){
 
         try{
-            return new ResponseEntity<>(userService.getUserByUsername(principal.getName()), HttpStatus.OK);
+            return new ResponseEntity<>(appUserService.getUserByUsername(principal.getName()), HttpStatus.OK);
         }
         catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -45,10 +46,10 @@ public class UserController {
     }
 
     @PutMapping("self")
-    public ResponseEntity<Object> updateYourself(Principal principal, @RequestBody AppUserDTO appUserDto){
+    public ResponseEntity<Object> updateYourself(Principal principal, @RequestBody AppUserUpdateDTO appUserUpdateDto){
 
         try{
-            userService.updateUser(principal.getName(), appUserDto);
+            appUserService.updateUser(principal.getName(), appUserUpdateDto);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
@@ -61,7 +62,7 @@ public class UserController {
     public ResponseEntity<Object> deleteYourself(Principal principal){
 
         try{
-            userService.deleteUser(principal.getName());
+            appUserService.deleteUser(principal.getName());
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
@@ -75,7 +76,7 @@ public class UserController {
     @GetMapping("self/courses")
     public ResponseEntity<Object> getYourCourses(Principal principal){
         try{
-            return new ResponseEntity<>(userService.getUserCourses(principal.getName()), HttpStatus.OK);
+            return new ResponseEntity<>(appUserService.getUserCourses(principal.getName()), HttpStatus.OK);
         }
         catch(UserNotFoundException | MissingParametersException | InvalidParametersException ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -85,7 +86,7 @@ public class UserController {
     @PostMapping("self/courses")
     public ResponseEntity<Object> joinCourse(Principal principal, @RequestBody CourseDTO courseDTO){
         try{
-            userService.joinCourse(principal.getName(), courseDTO.inviteCode);
+            appUserService.joinCourse(principal.getName(), courseDTO.inviteCode);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch(UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
@@ -96,7 +97,7 @@ public class UserController {
     @DeleteMapping("self/courses/{id}")
     public ResponseEntity<Object> leaveCourse(Principal principal, @PathVariable int id) {
         try {
-            userService.leaveCourse(principal.getName(), id);
+            appUserService.leaveCourse(principal.getName(), id);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         } catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException | MissingParametersException | InvalidParametersException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);

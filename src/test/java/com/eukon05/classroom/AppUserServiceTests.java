@@ -2,6 +2,7 @@ package com.eukon05.classroom;
 
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
+import com.eukon05.classroom.DTOs.AppUserUpdateDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
 import com.eukon05.classroom.Domains.Course;
@@ -11,7 +12,7 @@ import com.eukon05.classroom.Repositories.AppUserRepository;
 import com.eukon05.classroom.Repositories.CourseRepository;
 import com.eukon05.classroom.Services.AssignmentService;
 import com.eukon05.classroom.Services.CourseService;
-import com.eukon05.classroom.Services.UserService;
+import com.eukon05.classroom.Services.AppUserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +26,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Component
-public class UserServiceTests {
+public class AppUserServiceTests {
 
-    private UserService userService;
+    private AppUserService appUserService;
     private AppUserRepository appUserRepository;
     private AppUserCourseRepository aucRepository;
     private CourseService courseService;
@@ -52,14 +53,14 @@ public class UserServiceTests {
         courseRepository = Mockito.mock(CourseRepository.class);
         courseService = Mockito.spy(new CourseService(courseRepository, aucRepository, Mockito.mock(AssignmentService.class)));
 
-        userService = new UserService(appUserRepository, aucRepository, courseService, passwordEncoder);
+        appUserService = new AppUserService(appUserRepository, aucRepository, courseService, passwordEncoder);
 
     }
 
     @Test
     void create_user_test() throws InvalidParametersException, UsernameTakenException, MissingParametersException {
 
-        userService.createUser(userOneDto);
+        appUserService.createUser(userOneDto);
         Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
 
     }
@@ -70,7 +71,7 @@ public class UserServiceTests {
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
 
-        assertEquals(userService.getUserByUsername("testOne").getName(), "Test");
+        assertEquals(appUserService.getUserByUsername("testOne").getName(), "Test");
 
     }
 
@@ -80,10 +81,10 @@ public class UserServiceTests {
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
 
-        AppUserDTO updatedDto = new AppUserDTO();
+        AppUserUpdateDTO updatedDto = new AppUserUpdateDTO();
         updatedDto.password = "password";
 
-        userService.updateUser("testOne", updatedDto);
+        appUserService.updateUser("testOne", updatedDto);
         Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
 
     }
@@ -97,8 +98,8 @@ public class UserServiceTests {
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(test));
 
-        assertFalse(userService.getUserCourses("testOne").isEmpty());
-        assertEquals(userService.getUserCourses("testOne").get(0).getName(), "course");
+        assertFalse(appUserService.getUserCourses("testOne").isEmpty());
+        assertEquals(appUserService.getUserCourses("testOne").get(0).getName(), "course");
 
     }
 
@@ -114,7 +115,7 @@ public class UserServiceTests {
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
 
-        userService.joinCourse("testOne", "invitecode");
+        appUserService.joinCourse("testOne", "invitecode");
 
         Mockito.verify(aucRepository).save(Mockito.any(AppUserCourse.class));
         //Mockito.verify(courseService).saveCourse(Mockito.any(Course.class));
@@ -141,7 +142,7 @@ public class UserServiceTests {
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(test));
 
-        userService.leaveCourse("testOne", testCourse.getId());
+        appUserService.leaveCourse("testOne", testCourse.getId());
         Mockito.verify(aucRepository).delete(Mockito.any(AppUserCourse.class));
         //Mockito.verify(courseService).forceDeleteCourse(Mockito.any(Course.class));
 

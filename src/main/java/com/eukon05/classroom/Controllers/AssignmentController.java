@@ -1,6 +1,7 @@
 package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AssignmentDTO;
+import com.eukon05.classroom.DTOs.AssignmentDataDTO;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.AssignmentService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class AssignmentController {
     }
 
     @PostMapping("assignments")
-    public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDTO dto){
+    public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDataDTO dto){
 
         try{
             assignmentService.createAssignment(principal.getName(), courseId, dto);
@@ -49,7 +50,7 @@ public class AssignmentController {
     }
 
     @PutMapping("assignments/{assignmentId}")
-    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDTO dto){
+    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDataDTO dto){
 
         try{
             assignmentService.updateAssignment(principal.getName(), courseId, assignmentId, dto);
