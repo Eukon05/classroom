@@ -5,6 +5,7 @@ import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Services.AppUserService;
 import com.eukon05.classroom.Utils;
 import com.google.gson.Gson;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ public class RefreshController {
     }
 
     @PostMapping
+    @SecurityRequirement(name = "JWT")
     ResponseEntity<Object> refreshToken(HttpServletRequest request) {
         String auth = request.getHeader("Authorization");
         if(auth!=null && auth.startsWith("Bearer ")){

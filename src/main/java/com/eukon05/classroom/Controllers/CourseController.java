@@ -3,6 +3,7 @@ package com.eukon05.classroom.Controllers;
 import com.eukon05.classroom.DTOs.*;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.CourseService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class CourseController {
     private final CourseService courseService;
 
     @PostMapping
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> createCourse(Principal principal, @RequestBody CourseDataDTO dto){
 
         try{
@@ -31,6 +33,7 @@ public class CourseController {
     }
 
     @PutMapping("{id}")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> updateCourse(Principal principal, @PathVariable int id, @RequestBody CourseDataDTO dto){
 
         try{
@@ -47,6 +50,7 @@ public class CourseController {
     }
 
     @DeleteMapping("{id}")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> deleteCourse(Principal principal, @PathVariable int id){
 
         try{
@@ -64,6 +68,7 @@ public class CourseController {
 
 
     @PutMapping("{id}/users")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int id, @RequestBody CourseUserUpdateDTO dto){
 
         try{
@@ -81,6 +86,7 @@ public class CourseController {
     }
 
     @GetMapping("{id}/users")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> getUsers(Principal principal, @PathVariable int id){
 
         try{
@@ -97,6 +103,7 @@ public class CourseController {
     }
 
     @DeleteMapping("{id}/users")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody CourseUserDeleteDTO dto, @PathVariable int id){
 
         try{

@@ -1,9 +1,9 @@
 package com.eukon05.classroom.Controllers;
 
-import com.eukon05.classroom.DTOs.AssignmentDTO;
 import com.eukon05.classroom.DTOs.AssignmentDataDTO;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.AssignmentService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +19,7 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
 
     @GetMapping("assignments")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int courseId){
 
         try{
@@ -34,6 +35,7 @@ public class AssignmentController {
     }
 
     @PostMapping("assignments")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDataDTO dto){
 
         try{
@@ -50,6 +52,7 @@ public class AssignmentController {
     }
 
     @PutMapping("assignments/{assignmentId}")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDataDTO dto){
 
         try{
@@ -66,6 +69,7 @@ public class AssignmentController {
     }
 
     @DeleteMapping("assignments/{assignmentId}")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId){
 
         try{

@@ -2,9 +2,10 @@ package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.AppUserUpdateDTO;
-import com.eukon05.classroom.DTOs.CourseDTO;
+import com.eukon05.classroom.DTOs.CourseInviteCodeDTO;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.AppUserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ public class UserController {
     }
 
     @GetMapping("self")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> getYourself(Principal principal){
 
         try{
@@ -46,6 +48,7 @@ public class UserController {
     }
 
     @PutMapping("self")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> updateYourself(Principal principal, @RequestBody AppUserUpdateDTO appUserUpdateDto){
 
         try{
@@ -59,6 +62,7 @@ public class UserController {
     }
 
     @DeleteMapping("self")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> deleteYourself(Principal principal){
 
         try{
@@ -74,6 +78,7 @@ public class UserController {
 
 
     @GetMapping("self/courses")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> getYourCourses(Principal principal){
         try{
             return new ResponseEntity<>(appUserService.getUserCourses(principal.getName()), HttpStatus.OK);
@@ -84,9 +89,10 @@ public class UserController {
     }
 
     @PostMapping("self/courses")
-    public ResponseEntity<Object> joinCourse(Principal principal, @RequestBody CourseDTO courseDTO){
+    @SecurityRequirement(name = "JWT")
+    public ResponseEntity<Object> joinCourse(Principal principal, @RequestBody CourseInviteCodeDTO dto){
         try{
-            appUserService.joinCourse(principal.getName(), courseDTO.inviteCode);
+            appUserService.joinCourse(principal.getName(), dto.inviteCode);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         catch(UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
@@ -95,6 +101,7 @@ public class UserController {
     }
 
     @DeleteMapping("self/courses/{id}")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<Object> leaveCourse(Principal principal, @PathVariable int id) {
         try {
             appUserService.leaveCourse(principal.getName(), id);
