@@ -1,6 +1,5 @@
 package com.eukon05.classroom.Services;
 
-import com.eukon05.classroom.DTOs.CourseDTO;
 import com.eukon05.classroom.DTOs.CourseUserDTO;
 import com.eukon05.classroom.Domains.AppUser;
 import com.eukon05.classroom.Domains.AppUserCourse;
@@ -30,7 +29,7 @@ public class CourseService extends AbstractResourceService{
         this.assignmentService.setCourseService(this);
     }
 
-    void setUserService(AppUserService appUserService){
+    public void setAppUserService(AppUserService appUserService){
         this.appUserService = appUserService;
         this.assignmentService.setAppUserService(appUserService);
     }
@@ -126,7 +125,7 @@ public class CourseService extends AbstractResourceService{
     }
 
 
-    public List<CourseUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
+    public List<CourseUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
 
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = getCourseById(courseId);

@@ -3,6 +3,7 @@ package com.eukon05.classroom.Controllers;
 import com.eukon05.classroom.DTOs.AssignmentDataDTO;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.AssignmentService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ public class AssignmentController {
 
     @GetMapping("assignments")
     @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Returns all assignments for a course")
     public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int courseId){
 
         try{
@@ -36,52 +38,32 @@ public class AssignmentController {
 
     @PostMapping("assignments")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDataDTO dto){
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Creates a new assignment")
+    public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
 
-        try{
-            assignmentService.createAssignment(principal.getName(), courseId, dto);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
-        }
-        catch (UserNotFoundException | MissingParametersException | CourseNotFoundException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        assignmentService.createAssignment(principal.getName(), courseId, dto);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
 
     }
 
     @PutMapping("assignments/{assignmentId}")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDataDTO dto){
+    @Operation(summary = "Updates the assignment with provided details")
+    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, AssignmentNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
 
-        try{
-            assignmentService.updateAssignment(principal.getName(), courseId, assignmentId, dto);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | AssignmentNotFoundException | MissingParametersException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        assignmentService.updateAssignment(principal.getName(), courseId, assignmentId, dto);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 
     }
 
     @DeleteMapping("assignments/{assignmentId}")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId){
+    @Operation(summary = "Deletes the assignment")
+    public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, AssignmentNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
 
-        try{
-            assignmentService.deleteAssignment(principal.getName(), courseId, assignmentId);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | AssignmentNotFoundException | MissingParametersException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        assignmentService.deleteAssignment(principal.getName(), courseId, assignmentId);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 
     }
 

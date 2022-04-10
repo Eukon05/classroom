@@ -32,7 +32,7 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         appUserRepository=repository;
         this.appUserCourseRepository=appUserCourseRepository;
         this.courseService=courseService;
-        this.courseService.setUserService(this);
+        this.courseService.setAppUserService(this);
         this.passwordEncoder = passwordEncoder;
     }
 

@@ -1,4 +1,4 @@
-package com.eukon05.classroom;
+package com.eukon05.classroom.UnitTests;
 
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
@@ -19,13 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Component
 public class AppUserServiceTests {
 
     private AppUserService appUserService;

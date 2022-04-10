@@ -2,10 +2,12 @@ package com.eukon05.classroom.Controllers;
 
 import com.eukon05.classroom.DTOs.AppUserDTO;
 import com.eukon05.classroom.DTOs.CredentialsDTO;
+import com.eukon05.classroom.Exceptions.AccessDeniedException;
 import com.eukon05.classroom.Exceptions.InvalidParametersException;
 import com.eukon05.classroom.Exceptions.MissingParametersException;
 import com.eukon05.classroom.Utils;
 import com.google.gson.Gson;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +31,11 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping
-    ResponseEntity<Object> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request) {
+    @Operation(summary = "Allows the user to retrieve an auth token to use for all other operations")
+    ResponseEntity<Object> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request) throws AccessDeniedException, InvalidParametersException {
 
         if(dto.username == null || dto.password == null)
-            return new ResponseEntity<>(InvalidParametersException.message, HttpStatus.BAD_REQUEST);
+            throw new InvalidParametersException();
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(dto.username, dto.password);
@@ -40,7 +43,7 @@ public class AuthenticationController {
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
         if(!authentication.isAuthenticated())
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            throw new AccessDeniedException();
 
         Map<String, String> tokens = new HashMap<>();
         tokens.put("access_token", Utils.createAccessToken(dto.username, request.getRequestURL().toString()));

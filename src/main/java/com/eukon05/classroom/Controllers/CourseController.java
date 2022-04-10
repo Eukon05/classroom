@@ -3,6 +3,7 @@ package com.eukon05.classroom.Controllers;
 import com.eukon05.classroom.DTOs.*;
 import com.eukon05.classroom.Exceptions.*;
 import com.eukon05.classroom.Services.CourseService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,103 +21,62 @@ public class CourseController {
 
     @PostMapping
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> createCourse(Principal principal, @RequestBody CourseDataDTO dto){
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Creates a new course")
+    public ResponseEntity<Object> createCourse(Principal principal, @RequestBody CourseDataDTO dto) throws UserNotFoundException, MissingParametersException, InvalidParametersException {
 
-        try{
-            courseService.createCourse(principal.getName(), dto.name);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
-        }
-        catch (UserNotFoundException | MissingParametersException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        courseService.createCourse(principal.getName(), dto.name);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
 
     }
 
-    @PutMapping("{id}")
+    @PutMapping("{courseId}")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> updateCourse(Principal principal, @PathVariable int id, @RequestBody CourseDataDTO dto){
+    @Operation(summary = "Updates the course with provcourseIded details")
+    public ResponseEntity<Object> updateCourse(Principal principal, @PathVariable int courseId, @RequestBody CourseDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, MissingParametersException, InvalidParametersException {
 
-        try{
-            courseService.updateCourse(principal.getName(), id, dto.name);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        courseService.updateCourse(principal.getName(), courseId, dto.name);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("{courseId}")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> deleteCourse(Principal principal, @PathVariable int id){
+    @Operation(summary = "Deletes the course")
+    public ResponseEntity<Object> deleteCourse(Principal principal, @PathVariable int courseId) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, MissingParametersException, InvalidParametersException {
 
-        try{
-            courseService.deleteCourse(principal.getName(), id);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | InvalidParametersException | MissingParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        courseService.deleteCourse(principal.getName(), courseId);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 
     }
 
 
-    @PutMapping("{id}/users")
+    @PutMapping("{courseId}/users")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int id, @RequestBody CourseUserUpdateDTO dto){
+    @Operation(summary = "Changes a specified user role from a student to a teacher or vice versa")
+    public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int courseId, @RequestBody CourseUserUpdateDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, MissingParametersException, InvalidParametersException {
 
-        try{
-            courseService.updateUserRoleInCourse(principal.getName(), id, dto.username, dto.isTeacher);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
-
+        courseService.updateUserRoleInCourse(principal.getName(), courseId, dto.username, dto.isTeacher);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 
     }
 
-    @GetMapping("{id}/users")
+    @GetMapping("{courseId}/users")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> getUsers(Principal principal, @PathVariable int id){
+    @Operation(summary = "Returns a list of all attending users")
+    public ResponseEntity<Object> getUsers(Principal principal, @PathVariable int courseId) throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, MissingParametersException, InvalidParametersException {
 
-        try{
-            return new ResponseEntity<>(courseService.getCourseUsers(principal.getName(), id), HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | MissingParametersException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
-
+        return new ResponseEntity<>(courseService.getCourseUsers(principal.getName(), courseId), HttpStatus.OK);
 
     }
 
-    @DeleteMapping("{id}/users")
+    @DeleteMapping("{courseId}/users")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody CourseUserDeleteDTO dto, @PathVariable int id){
+    @Operation(summary = "Deletes a user from the course")
+    public ResponseEntity<Object> deleteUserFromCourse(Principal principal, @RequestBody CourseUserDeleteDTO dto, @PathVariable int courseId) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, MissingParametersException, InvalidParametersException {
 
-        try{
-            courseService.deleteUserFromCourse(principal.getName(), dto.username, id);
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | UserNotAttendingTheCourseException | MissingParametersException | InvalidParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
-
+        courseService.deleteUserFromCourse(principal.getName(), dto.username, courseId);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 
     }
 
