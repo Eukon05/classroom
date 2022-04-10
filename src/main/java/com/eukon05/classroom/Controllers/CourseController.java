@@ -32,7 +32,7 @@ public class CourseController {
 
     @PutMapping("{courseId}")
     @SecurityRequirement(name = "JWT")
-    @Operation(summary = "Updates the course with provcourseIded details")
+    @Operation(summary = "Updates the course with provided details")
     public ResponseEntity<Object> updateCourse(Principal principal, @PathVariable int courseId, @RequestBody CourseDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, MissingParametersException, InvalidParametersException {
 
         courseService.updateCourse(principal.getName(), courseId, dto.name);
