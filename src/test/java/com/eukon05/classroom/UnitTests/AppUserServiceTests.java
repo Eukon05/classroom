@@ -69,21 +69,24 @@ public class AppUserServiceTests {
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
 
-        assertEquals(appUserService.getUserByUsername("testOne").getName(), "Test");
+        assertEquals("Test", appUserService.getUserByUsername("testOne").getName());
 
     }
 
     @Test
     void update_user_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
 
+        AppUser user = new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname);
+
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
-                .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
+                .thenReturn(Optional.of(user));
 
         AppUserUpdateDTO updatedDto = new AppUserUpdateDTO();
         updatedDto.password = "password";
 
         appUserService.updateUser("testOne", updatedDto);
         Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
+        assertTrue(passwordEncoder.matches("password", user.getPassword()));
 
     }
 
@@ -97,13 +100,14 @@ public class AppUserServiceTests {
                 .thenReturn(Optional.of(test));
 
         assertFalse(appUserService.getUserCourses("testOne").isEmpty());
-        assertEquals(appUserService.getUserCourses("testOne").get(0).getName(), "course");
+        assertEquals("course", appUserService.getUserCourses("testOne").get(0).getName());
 
     }
 
     @Test
     void join_course_test() throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, MissingParametersException {
 
+        AppUser user = new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname);
         Course testCourse = new Course("TestCourse");
         testCourse.setId(1);
 
@@ -111,38 +115,40 @@ public class AppUserServiceTests {
                 .thenReturn(Optional.of(testCourse));
 
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
-                .thenReturn(Optional.of(new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname)));
+                .thenReturn(Optional.of(user));
 
         appUserService.joinCourse("testOne", "invitecode");
 
         Mockito.verify(aucRepository).save(Mockito.any(AppUserCourse.class));
         //Mockito.verify(courseService).saveCourse(Mockito.any(Course.class));
         Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
+        assertEquals(testCourse, user.getCourses().get(0).getCourse());
 
     }
 
     @Test
     void leave_course_test() throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
 
-        AppUser test = new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname);
+        AppUser user = new AppUser(userOneDto.username, userOneDto.password, userOneDto.name, userOneDto.surname);
 
         Course testCourse = new Course("TestCourse");
         testCourse.setId(1);
 
-        AppUserCourse auc = new AppUserCourse(test, testCourse, false);
+        AppUserCourse auc = new AppUserCourse(user, testCourse, false);
 
-        test.getCourses().add(auc);
+        user.getCourses().add(auc);
         testCourse.getAppUsers().add(auc);
 
         Mockito.when(courseRepository.findById(1))
                 .thenReturn(Optional.of(testCourse));
 
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
-                .thenReturn(Optional.of(test));
+                .thenReturn(Optional.of(user));
 
         appUserService.leaveCourse("testOne", testCourse.getId());
         Mockito.verify(aucRepository).delete(Mockito.any(AppUserCourse.class));
         //Mockito.verify(courseService).forceDeleteCourse(Mockito.any(Course.class));
+        assertTrue(user.getCourses().isEmpty());
 
     }
 

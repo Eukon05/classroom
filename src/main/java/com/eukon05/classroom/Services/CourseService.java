@@ -73,10 +73,6 @@ public class CourseService extends AbstractResourceService{
 
         course.setInviteCode(random);
 
-        //It should be possible to simply generate the id with an annotation in the Course class, but this should work for now
-        int id = courseRepository.findMaxCourseId().orElse(1);
-
-        course.setId(id);
         courseRepository.save(course);
         appUserCourseRepository.save(appUserService.addCourse(appUser, course, true));
         courseRepository.save(course);
@@ -120,7 +116,6 @@ public class CourseService extends AbstractResourceService{
         course.setName(newName);
 
         saveCourse(course);
-
 
     }
 

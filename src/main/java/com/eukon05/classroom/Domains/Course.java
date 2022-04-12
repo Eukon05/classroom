@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GeneratorType;
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,8 @@ import java.util.Objects;
 public class Course {
 
     @Id
+    @GenericGenerator(name = "inc", strategy = "increment")
+    @GeneratedValue(generator = "inc")
     private Integer id;
 
     private String name;

@@ -53,7 +53,7 @@ public class CourseController {
 
     @PutMapping("{courseId}/users")
     @SecurityRequirement(name = "JWT")
-    @Operation(summary = "Changes a specified user role from a student to a teacher or vice versa")
+    @Operation(summary = "Changes a specified user's role from a student to a teacher or vice versa")
     public ResponseEntity<Object> updateUserRole(Principal principal, @PathVariable int courseId, @RequestBody CourseUserUpdateDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, MissingParametersException, InvalidParametersException {
 
         courseService.updateUserRoleInCourse(principal.getName(), courseId, dto.username, dto.isTeacher);
