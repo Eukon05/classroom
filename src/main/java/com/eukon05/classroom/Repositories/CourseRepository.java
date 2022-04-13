@@ -12,7 +12,4 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     Optional<Course> findCourseByInviteCode(String inviteCode);
 
-    @Query(value = "SELECT MAX(id) FROM Course", nativeQuery = true)
-    Optional<Integer> findMaxCourseId();
-
 }

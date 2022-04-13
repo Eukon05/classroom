@@ -69,10 +69,10 @@ public class AssignmentService extends AbstractResourceService{
 
         Assignment assignment = getAssignmentById(assignmentId);
 
-        if(dto.title == null && dto.content == null && dto.links == null)
+        if((dto.title == null || dto.title.isEmpty()) && dto.content == null && dto.links == null)
             throw new MissingParametersException();
 
-        if(dto.title != null)
+        if(dto.title != null && !dto.title.isEmpty())
             assignment.setTitle(dto.title);
 
         if(dto.content != null)
@@ -81,7 +81,7 @@ public class AssignmentService extends AbstractResourceService{
         if(dto.links != null)
             assignment.setLinks(dto.links);
 
-        saveAssignment(assignment);
+        assignmentRepository.save(assignment);
 
     }
 
@@ -98,7 +98,12 @@ public class AssignmentService extends AbstractResourceService{
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        deleteAssignment(assignmentId);
+        Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
+
+        if(assignment.isEmpty())
+            throw new AssignmentNotFoundException();
+
+        assignmentRepository.delete(assignment.get());
     }
 
     Assignment getAssignmentById(int assignmentId) throws AssignmentNotFoundException {
@@ -116,18 +121,4 @@ public class AssignmentService extends AbstractResourceService{
         assignmentRepository.deleteAll(assignmentRepository.findAssignmentsByCourseID(courseId));
     }
 
-    private void deleteAssignment(int assignmentId) throws AssignmentNotFoundException {
-
-        Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
-
-        if(assignment.isEmpty())
-            throw new AssignmentNotFoundException();
-
-        assignmentRepository.delete(assignment.get());
-
-    }
-
-    private void saveAssignment(Assignment assignment){
-        assignmentRepository.save(assignment);
-    }
 }

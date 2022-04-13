@@ -39,6 +39,7 @@ public class CourseServiceTests {
         appUserRepository = Mockito.mock(AppUserRepository.class);
         courseService = new CourseService(courseRepository, aucRepository, assignmentService);
         appUserService = Mockito.spy(new AppUserService(appUserRepository, aucRepository, courseService, new BCryptPasswordEncoder()));
+        courseService.setAppUserService(appUserService); //this should be automatically done through AppUserService's constructor, idk why it doesn't work
 
     }
 
@@ -75,6 +76,7 @@ public class CourseServiceTests {
                 .thenReturn(Optional.of(course));
 
         courseService.updateCourse("testOne", 1, "updated");
+        Mockito.verify(courseRepository).save(Mockito.any(Course.class));
         assertEquals("updated", course.getName());
 
     }
@@ -151,6 +153,7 @@ public class CourseServiceTests {
         Mockito.when(courseRepository.findById(1)).thenReturn(Optional.of(course));
 
         courseService.deleteUserFromCourse(user.getUsername(), user2.getUsername(), 1);
+        Mockito.verify(appUserService).leaveCourse("testTwo", 1);
 
         assertEquals(1, course.getAppUsers().size());
 
