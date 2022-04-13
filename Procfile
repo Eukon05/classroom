@@ -1,1 +1,1 @@
-worker: java -jar target/classroom.jar
+web: java -jar target/classroom.jar $PORT
