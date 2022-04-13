@@ -15,7 +15,7 @@
 	<description>classroom</description>
 	<properties>
 		<java.version>11</java.version>
-		<vaadin.version>14.8.1</vaadin.version>
+		<!--<vaadin.version>14.8.1</vaadin.version>-->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -135,6 +135,7 @@
 	-->
 
 	<build>
+		<finalName>${project.name}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -192,16 +193,6 @@
 					<activeByDefault>false</activeByDefault>
 				</activation>
 			</profile>
-
-		<profile>
-			<id>test</id>
-			<properties>
-				<activatedProperties>test</activatedProperties>
-			</properties>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-		</profile>
 
 	</profiles>
 
