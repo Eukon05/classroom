@@ -7,7 +7,7 @@ The list of available endpoints is available after running the app, on this url:
 <br><br>
 <b>http://[yourserveradress]:8080/api/v1/swagger-ui.html</b>
 <br><br>
-<a href="https://eukon-classroom.herokuapp.com/api/v1/swagger-ui.html">You can demo the project here</a>
+<a href="https://eukon-classroom.herokuapp.com/api/v1/swagger-ui.html">You can demo the API here</a>
 <h2>Functionality</h2>
 This API allows its users to create "courses", (aka groups), in which short assignments can be shared by the course's "teacher" (aka admin).
 <br><br>
