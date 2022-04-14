@@ -44,14 +44,14 @@ public class AssignmentService extends AbstractResourceService{
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        valueCheck(dto.title);
+        valueCheck(dto.title.trim());
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
 
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        Assignment assignment = new Assignment(dto.title, dto.content, dto.links, courseId);
+        Assignment assignment = new Assignment(dto.title.trim(), dto.content.trim(), dto.links, courseId);
         assignmentRepository.save(assignment);
 
     }
@@ -69,14 +69,14 @@ public class AssignmentService extends AbstractResourceService{
 
         Assignment assignment = getAssignmentById(assignmentId);
 
-        if((dto.title == null || dto.title.isEmpty()) && dto.content == null && dto.links == null)
+        if((dto.title == null || dto.title.trim().isEmpty()) && dto.content == null && dto.links == null)
             throw new MissingParametersException();
 
-        if(dto.title != null && !dto.title.isEmpty())
-            assignment.setTitle(dto.title);
+        if(dto.title != null && !dto.title.trim().isEmpty())
+            assignment.setTitle(dto.title.trim());
 
         if(dto.content != null)
-            assignment.setContent(dto.content);
+            assignment.setContent(dto.content.trim());
 
         if(dto.links != null)
             assignment.setLinks(dto.links);
@@ -98,22 +98,16 @@ public class AssignmentService extends AbstractResourceService{
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
+        Assignment assignment = getAssignmentById(assignmentId);
 
-        if(assignment.isEmpty())
-            throw new AssignmentNotFoundException();
-
-        assignmentRepository.delete(assignment.get());
+        assignmentRepository.delete(assignment);
     }
 
     Assignment getAssignmentById(int assignmentId) throws AssignmentNotFoundException {
 
         Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
 
-        if(assignment.isEmpty())
-            throw new AssignmentNotFoundException();
-
-        return assignment.get();
+        return assignment.orElseThrow(() -> new AssignmentNotFoundException());
 
     }
 

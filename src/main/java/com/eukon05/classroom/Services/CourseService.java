@@ -34,14 +34,15 @@ public class CourseService extends AbstractResourceService{
         this.assignmentService.setAppUserService(appUserService);
     }
 
-    Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException {
+    Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException, InvalidParametersException {
 
         valueCheck(inviteCode);
 
+        if(inviteCode.length()!=6)
+            throw new InvalidParametersException();
+
         Optional<Course> courseOptional = courseRepository.findCourseByInviteCode(inviteCode);
-        if(courseOptional.isEmpty())
-            throw new CourseNotFoundException();
-        return courseOptional.get();
+        return courseOptional.orElseThrow(() -> new CourseNotFoundException());
         
     }
 
@@ -50,18 +51,16 @@ public class CourseService extends AbstractResourceService{
         valueCheck(id);
 
         Optional<Course> courseOptional = courseRepository.findById(id);
-        if(courseOptional.isEmpty())
-            throw new CourseNotFoundException();
-        return courseOptional.get();
+        return courseOptional.orElseThrow(() -> new CourseNotFoundException());
     }
     
     public void createCourse(String username, String courseName) throws MissingParametersException, UserNotFoundException, InvalidParametersException {
 
         AppUser appUser = appUserService.getUserByUsername(username);
 
-        valueCheck(courseName);
+        valueCheck(courseName.trim());
 
-        Course course = new Course(courseName);
+        Course course = new Course(courseName.trim());
         Optional<Course> tmp;
         String random;
 
@@ -111,9 +110,9 @@ public class CourseService extends AbstractResourceService{
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        valueCheck(newName);
+        valueCheck(newName.trim());
 
-        course.setName(newName);
+        course.setName(newName.trim());
 
         saveCourse(course);
 
