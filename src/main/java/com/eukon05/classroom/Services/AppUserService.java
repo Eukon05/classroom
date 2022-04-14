@@ -53,7 +53,7 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         valueCheck(appUserDTO.name);
         valueCheck(appUserDTO.surname);
 
-        AppUser user = new AppUser(appUserDTO.username, appUserDTO.password, appUserDTO.name, appUserDTO.surname);
+        AppUser user = new AppUser(appUserDTO.username, appUserDTO.password, appUserDTO.name.trim(), appUserDTO.surname.trim());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         appUserRepository.save(user);
 
@@ -64,15 +64,14 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         credentialCheck(username);
 
         Optional<AppUser> user = appUserRepository.findAppUserByUsername(username);
-        if(user.isEmpty())
-            throw new UserNotFoundException(username);
-        return user.get();
+        return user.orElseThrow(() -> new UserNotFoundException("username"));
+
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {return getUserByUsername(username);}
-
+        //This is necessary to override the loadUserByUsername method properly, I should think of a cleaner fix though
         catch (UserNotFoundException | InvalidParametersException | MissingParametersException e){throw new UsernameNotFoundException(e.getMessage());}
 
     }
@@ -81,19 +80,19 @@ public class AppUserService extends AbstractResourceService implements UserDetai
 
         AppUser user = getUserByUsername(username);
 
-        if(dto.name == null && dto.surname == null && dto.password == null)
+        if(dto.name == null && dto.surname == null && (dto.password == null || dto.password.isEmpty()))
             throw new MissingParametersException();
 
-        if((dto.password!=null)) {
+        if(dto.password!=null && !dto.password.isEmpty()) {
             credentialCheck(dto.password);
             user.setPassword(passwordEncoder.encode(dto.password));
         }
 
         if(dto.name!=null)
-            user.setName(dto.name);
+            user.setName(dto.name.trim());
 
         if(dto.surname!=null)
-            user.setSurname(dto.surname);
+            user.setSurname(dto.surname.trim());
 
         saveUser(user);
 
