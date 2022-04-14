@@ -111,13 +111,13 @@ public class AppUserServiceTests {
         Course testCourse = new Course("TestCourse");
         testCourse.setId(1);
 
-        Mockito.when(courseRepository.findCourseByInviteCode("invitecode"))
+        Mockito.when(courseRepository.findCourseByInviteCode("tstcod"))
                 .thenReturn(Optional.of(testCourse));
 
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(user));
 
-        appUserService.joinCourse("testOne", "invitecode");
+        appUserService.joinCourse("testOne", "tstcod");
 
         Mockito.verify(aucRepository).save(Mockito.any(AppUserCourse.class));
         //Mockito.verify(courseService).saveCourse(Mockito.any(Course.class));
