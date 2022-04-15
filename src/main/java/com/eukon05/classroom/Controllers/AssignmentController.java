@@ -22,17 +22,9 @@ public class AssignmentController {
     @GetMapping("assignments")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Returns all assignments for a course")
-    public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int courseId){
+    public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int courseId) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
 
-        try{
             return new ResponseEntity<>(assignmentService.getAssignmentsForCourse(principal.getName(), courseId), HttpStatus.OK);
-        }
-        catch (UserNotFoundException | CourseNotFoundException | InvalidParametersException | MissingParametersException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (AccessDeniedException | UserNotAttendingTheCourseException ex){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-        }
 
     }
 

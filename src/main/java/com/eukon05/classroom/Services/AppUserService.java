@@ -64,7 +64,7 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         credentialCheck(username);
 
         Optional<AppUser> user = appUserRepository.findAppUserByUsername(username);
-        return user.orElseThrow(() -> new UserNotFoundException("username"));
+        return user.orElseThrow(() -> new UserNotFoundException(username));
 
     }
 
@@ -80,10 +80,10 @@ public class AppUserService extends AbstractResourceService implements UserDetai
 
         AppUser user = getUserByUsername(username);
 
-        if(dto.name == null && dto.surname == null && (dto.password == null || dto.password.isEmpty()))
+        if(dto.name == null && dto.surname == null && dto.password == null)
             throw new MissingParametersException();
 
-        if(dto.password!=null && !dto.password.isEmpty()) {
+        if(dto.password!=null) {
             credentialCheck(dto.password);
             user.setPassword(passwordEncoder.encode(dto.password));
         }
@@ -113,30 +113,13 @@ public class AppUserService extends AbstractResourceService implements UserDetai
 
             if (course.getAppUsers().isEmpty())
                 courseService.forceDeleteCourse(course);
-            else {
-
-                boolean courseStillHasATeacher = false;
-
-                for(AppUserCourse auc2 : course.getAppUsers()){
-                    if(auc2.isTeacher()) {
-                        courseStillHasATeacher = true;
-                        break;
-                    }
-                }
-
-                if(!courseStillHasATeacher){
-                    AppUserCourse newTeacher = course.getAppUsers().get(0);
-                    newTeacher.setTeacher(true);
-                    appUserCourseRepository.save(newTeacher);
-                }
-
-            }
+            else
+                reassignTeacher(course);
 
         }
 
         appUserRepository.delete(user);
     }
-
 
     public List<Course> getUserCourses(String username) throws UserNotFoundException, InvalidParametersException, MissingParametersException {
 
@@ -183,23 +166,9 @@ public class AppUserService extends AbstractResourceService implements UserDetai
             return;
         }
 
-        boolean courseStillHasATeacher = false;
-
-        for(AppUserCourse auc2 : course.getAppUsers()){
-            if(auc2.isTeacher()) {
-                courseStillHasATeacher = true;
-                break;
-            }
-        }
-
-        if(!courseStillHasATeacher){
-            AppUserCourse newTeacher = course.getAppUsers().get(0);
-            newTeacher.setTeacher(true);
-            appUserCourseRepository.save(newTeacher);
-        }
+        reassignTeacher(course);
 
     }
-
 
 
     AppUserCourse addCourse(AppUser user, Course course, boolean isTeacher){
@@ -224,6 +193,23 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         }
 
         return null;
+    }
+
+    private void reassignTeacher(Course course) {
+        boolean courseStillHasATeacher = false;
+
+        for(AppUserCourse auc2 : course.getAppUsers()){
+            if(auc2.isTeacher()) {
+                courseStillHasATeacher = true;
+                break;
+            }
+        }
+
+        if(!courseStillHasATeacher){
+            AppUserCourse newTeacher = course.getAppUsers().get(0);
+            newTeacher.setTeacher(true);
+            appUserCourseRepository.save(newTeacher);
+        }
     }
 
 

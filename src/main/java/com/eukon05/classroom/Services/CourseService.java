@@ -144,6 +144,11 @@ public class CourseService extends AbstractResourceService{
 
     public void updateUserRoleInCourse(String principalUsername, int courseId, String username, boolean isTeacher) throws UserNotFoundException, InvalidParametersException, MissingParametersException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException {
 
+        if(principalUsername.equals(username))
+            throw new InvalidParametersException();
+
+        valueCheck(isTeacher);
+
         AppUser appUser = appUserService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);
 
@@ -153,11 +158,6 @@ public class CourseService extends AbstractResourceService{
             throw new AccessDeniedException();
 
         AppUser tmpAppUser = appUserService.getUserByUsername(username);
-
-        if(appUser.equals(tmpAppUser))
-            throw new InvalidParametersException();
-
-        valueCheck(isTeacher);
 
         AppUserCourse tmpAuc = getAppUserCourse(tmpAppUser, course);
 
@@ -174,7 +174,7 @@ public class CourseService extends AbstractResourceService{
 
         AppUserCourse auc = getAppUserCourse(appUser, course);
 
-        if(!auc.isTeacher())
+        if(!auc.isTeacher() && !principalUsername.equals(username))
             throw new AccessDeniedException();
 
         appUserService.leaveCourse(username, courseId);
