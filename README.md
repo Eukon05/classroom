@@ -1,13 +1,13 @@
-<h1>This project is still in development</h1>
+<h1>Classroom API</h1>
 
 <h2>Purpose</h2>
 This project is meant to represent my current abilities in creating RESTful API's using Spring Boot.
 <br>
 The list of available endpoints is available after running the app, on this url:
 <br><br>
-<b>http://[yourserveradress]:8080/api/v1/swagger-ui.html</b>
+`http://yourserveradress:8080/api/v1/swagger-ui.html`
 <br><br>
-<a href="https://eukon-classroom.herokuapp.com/api/v1/swagger-ui.html" target="_blank">You can demo the API here</a>
+[You can demo the API here](https://eukon-classroom.herokuapp.com/api/v1/swagger-ui.html)
 <h2>Functionality</h2>
 This API allows its users to create "courses", (aka groups), in which short assignments can be shared by the course's "teacher" (aka admin).
 <br><br>
