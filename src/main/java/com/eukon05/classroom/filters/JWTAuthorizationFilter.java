@@ -28,8 +28,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String auth = httpServletRequest.getHeader("Authorization");
 
-        if(auth==null || !auth.startsWith("Bearer "))
+        if(auth==null || !auth.startsWith("Bearer ")) {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
+            return;
+        }
 
         try {
             DecodedJWT jwt = jwtService.verifyAndReturnToken(auth);
