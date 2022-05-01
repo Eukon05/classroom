@@ -44,7 +44,7 @@ public class CourseServiceTests {
     }
 
     @Test
-    void create_course_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+    void create_course_test() throws UserNotFoundException, InvalidParameterException, MissingParametersException {
 
         AppUser user = new AppUser("testOne", "testpass", "Test", "One");
 
@@ -62,7 +62,7 @@ public class CourseServiceTests {
     }
 
     @Test
-    void update_course_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    void update_course_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
 
         AppUser user = new AppUser("testOne", "testpass", "Test", "One");
 
@@ -82,7 +82,7 @@ public class CourseServiceTests {
     }
 
     @Test
-    void get_course_users_test() throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    void get_course_users_test() throws UserNotFoundException, CourseNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
 
         AppUser user = new AppUser("testOne", "testpass", "Test", "One");
         AppUser user2 = new AppUser("testTwo", "testpass", "Test", "Two");
@@ -106,7 +106,7 @@ public class CourseServiceTests {
     }
 
     @Test
-    void update_user_role_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    void update_user_role_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
 
         AppUser user = new AppUser("testOne", "testpass", "Test", "One");
         AppUser user2 = new AppUser("testTwo", "testpass", "Test", "Two");
@@ -130,7 +130,7 @@ public class CourseServiceTests {
     }
 
     @Test
-    void delete_user_from_course_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
+    void delete_user_from_course_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParameterException, MissingParametersException {
 
         AppUser user = new AppUser("testOne", "testpass", "Test", "One");
         AppUser user2 = new AppUser("testTwo", "testpass", "Test", "Two");
@@ -160,7 +160,7 @@ public class CourseServiceTests {
     }
 
     @Test
-    void delete_course_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    void delete_course_test() throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
 
         AppUser user = new AppUser("testOne", "testpass", "Test", "One");
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))

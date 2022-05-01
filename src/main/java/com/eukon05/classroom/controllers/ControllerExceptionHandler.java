@@ -20,7 +20,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>("Invalid/missing body", HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {InvalidParametersException.class,
+    @ExceptionHandler(value = {InvalidParameterException.class,
             MissingParametersException.class,
             UsernameTakenException.class,
             MissingRefreshTokenException.class})

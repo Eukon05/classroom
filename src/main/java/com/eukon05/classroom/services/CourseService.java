@@ -1,9 +1,12 @@
 package com.eukon05.classroom.services;
 
+import com.eukon05.classroom.builders.InvalidParameterExceptionBuilder;
 import com.eukon05.classroom.domains.AppUser;
 import com.eukon05.classroom.domains.AppUserCourse;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.CourseUserDTO;
+import com.eukon05.classroom.enums.ExceptionType;
+import com.eukon05.classroom.enums.Param;
 import com.eukon05.classroom.exceptions.*;
 import com.eukon05.classroom.repositories.AppUserCourseRepository;
 import com.eukon05.classroom.repositories.CourseRepository;
@@ -34,33 +37,36 @@ public class CourseService extends AbstractResourceService{
         this.assignmentService.setAppUserService(appUserService);
     }
 
-    Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException, InvalidParametersException {
-        valueCheck(inviteCode);
+    Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException, InvalidParameterException {
+        isValid(inviteCode, Param.inviteCode);
 
-        if(inviteCode.length()!=6)
-            throw new InvalidParametersException();
+        if(inviteCode.length()<6)
+            throw new InvalidParameterExceptionBuilder(ExceptionType.tooShort, Param.inviteCode).build();
 
         Optional<Course> courseOptional = courseRepository.findCourseByInviteCode(inviteCode);
-        return courseOptional.orElseThrow(() -> new CourseNotFoundException());
+        return courseOptional.orElseThrow(() -> new CourseNotFoundException(inviteCode));
     }
 
     Course getCourseById(int id) throws CourseNotFoundException, MissingParametersException {
-        valueCheck(id);
+        isValid(id, Param.courseId);
         Optional<Course> courseOptional = courseRepository.findById(id);
-        return courseOptional.orElseThrow(() -> new CourseNotFoundException());
+        return courseOptional.orElseThrow(() -> new CourseNotFoundException(id));
     }
     
-    public void createCourse(String username, String courseName) throws MissingParametersException, UserNotFoundException, InvalidParametersException {
+    public void createCourse(String username, String courseName) throws MissingParametersException, UserNotFoundException, InvalidParameterException {
         AppUser appUser = appUserService.getUserByUsername(username);
 
-        valueCheck(courseName.trim());
+        if(courseName==null)
+            throw new MissingParametersException(Param.courseName);
+
+        isValid(courseName.trim(), Param.courseName);
 
         Course course = new Course(courseName.trim());
         Optional<Course> tmp;
         String random;
 
         do {
-            random = generateCourseKey(6);
+            random = generateCourseKey();
             tmp = courseRepository.findCourseByInviteCode(random);
 
         } while (tmp.isPresent());
@@ -73,7 +79,7 @@ public class CourseService extends AbstractResourceService{
         appUserService.saveUser(appUser);
     }
 
-    public void deleteCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
+    public void deleteCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, InvalidParameterException, MissingParametersException, UserNotAttendingTheCourseException {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
@@ -92,7 +98,7 @@ public class CourseService extends AbstractResourceService{
         forceDeleteCourse(course);
     }
 
-    public void updateCourse(String username, int courseId, String newName) throws CourseNotFoundException, UserNotFoundException, AccessDeniedException, MissingParametersException, InvalidParametersException, UserNotAttendingTheCourseException {
+    public void updateCourse(String username, int courseId, String newName) throws CourseNotFoundException, UserNotFoundException, AccessDeniedException, MissingParametersException, InvalidParameterException, UserNotAttendingTheCourseException {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
@@ -101,7 +107,7 @@ public class CourseService extends AbstractResourceService{
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        valueCheck(newName.trim());
+        isValid(newName.trim(), Param.courseName);
 
         course.setName(newName.trim());
 
@@ -109,7 +115,7 @@ public class CourseService extends AbstractResourceService{
     }
 
 
-    public List<CourseUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, MissingParametersException, UserNotAttendingTheCourseException {
+    public List<CourseUserDTO> getCourseUsers(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, InvalidParameterException, MissingParametersException, UserNotAttendingTheCourseException {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
@@ -130,11 +136,11 @@ public class CourseService extends AbstractResourceService{
         return users;
     }
 
-    public void updateUserRoleInCourse(String principalUsername, int courseId, String username, boolean isTeacher) throws UserNotFoundException, InvalidParametersException, MissingParametersException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException {
+    public void updateUserRoleInCourse(String principalUsername, int courseId, String username, boolean isTeacher) throws UserNotFoundException, InvalidParameterException, MissingParametersException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException {
         if(principalUsername.equals(username))
-            throw new InvalidParametersException();
+            throw new InvalidParameterExceptionBuilder(ExceptionType.selfRoleChange, Param.username).build();
 
-        valueCheck(isTeacher);
+        isValid(isTeacher, Param.isTeacher);
 
         AppUser appUser = appUserService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);
@@ -153,7 +159,7 @@ public class CourseService extends AbstractResourceService{
         appUserCourseRepository.save(tmpAuc);
     }
 
-    public void deleteUserFromCourse(String principalUsername, String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
+    public void deleteUserFromCourse(String principalUsername, String username, int courseId) throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException, InvalidParameterException, MissingParametersException {
         AppUser appUser = appUserService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);
 
@@ -179,12 +185,12 @@ public class CourseService extends AbstractResourceService{
     }
 
 
-    private String generateCourseKey(int length){
+    private String generateCourseKey(){
         StringBuilder result = new StringBuilder();
         String characters = "QWERTYUIOPASDFGHJKLZXCVBNM1234567890";
         Random random = new Random();
 
-        for(int i=0; i<length; i++){
+        for(int i = 0; i< 6; i++){
             result.append(characters.charAt(random.nextInt(characters.length())));
         }
 
@@ -196,8 +202,8 @@ public class CourseService extends AbstractResourceService{
     }
 
     void forceDeleteCourse(Course course) {
+        assignmentService.deleteAllAssignmentsFromCourse(course);
         courseRepository.delete(course);
-        assignmentService.deleteAllAssignmentsFromCourse(course.getId());
     }
 
 

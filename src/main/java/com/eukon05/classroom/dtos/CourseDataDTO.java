@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class CourseDataDTO {
 
-    private String name;
+    private String courseName;
 
 }

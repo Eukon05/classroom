@@ -2,7 +2,7 @@ package com.eukon05.classroom.controllers;
 
 import com.eukon05.classroom.dtos.CredentialsDTO;
 import com.eukon05.classroom.exceptions.AccessDeniedException;
-import com.eukon05.classroom.exceptions.InvalidParametersException;
+import com.eukon05.classroom.exceptions.MissingParametersException;
 import com.eukon05.classroom.services.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class AuthenticationController {
 
     @PostMapping
     @Operation(summary = "Allows the user to retrieve an auth token to use for all other operations")
-    ResponseEntity<Object> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request) throws AccessDeniedException, InvalidParametersException {
+    ResponseEntity<Object> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request) throws AccessDeniedException, MissingParametersException {
         return new ResponseEntity<>(securityService.authenticate(dto.getUsername(), dto.getPassword(), request.getRequestURL().toString()), HttpStatus.OK);
     }
 

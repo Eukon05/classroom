@@ -6,8 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,21 +20,16 @@ public class Assignment {
     @GenericGenerator(name = "inc", strategy = "increment")
     @GeneratedValue(generator = "inc")
     private Integer id;
-
     private String title;
     private String content;
 
-    @ElementCollection
-    private List<String> links = new ArrayList<>();
+    @ElementCollection()
+    private Set<String> links = new HashSet<>();
 
-    @Column(name = "course_id")
-    private int courseID;
-
-    public Assignment(String title, String content, List<String> links, int courseID){
+    public Assignment(String title, String content, Set<String> links){
         this.title=title;
         this.content=content;
         this.links=links;
-        this.courseID=courseID;
     }
 
 }

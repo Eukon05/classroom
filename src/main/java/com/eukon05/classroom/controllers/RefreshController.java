@@ -23,7 +23,7 @@ public class RefreshController {
     @PostMapping
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Returns a new auth token after providing a refresh token")
-    ResponseEntity<Object> refreshToken(HttpServletRequest request) throws InvalidTokenException, UserNotFoundException, InvalidParametersException, MissingParametersException, MissingRefreshTokenException {
+    ResponseEntity<Object> refreshToken(HttpServletRequest request) throws InvalidTokenException, UserNotFoundException, InvalidParameterException, MissingParametersException, MissingRefreshTokenException {
         return new ResponseEntity<>(securityService.refresh(request.getHeader("Authorization"), request.getRequestURL().toString()), HttpStatus.OK);
     }
 

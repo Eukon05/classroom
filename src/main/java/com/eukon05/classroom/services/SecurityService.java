@@ -20,9 +20,9 @@ public class SecurityService {
     private final JWTService jwtService;
     private final AppUserService appUserService;
 
-    public Map<String, String> authenticate(String username, String password, String requestUrl) throws InvalidParametersException, AccessDeniedException {
+    public Map<String, String> authenticate(String username, String password, String requestUrl) throws AccessDeniedException, MissingParametersException {
         if(username == null || password == null)
-            throw new InvalidParametersException();
+            throw new MissingParametersException();
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(username, password);
@@ -39,7 +39,7 @@ public class SecurityService {
         return tokens;
     }
 
-    public Map<String, String> refresh(String auth, String requestUrl) throws MissingParametersException, InvalidTokenException, UserNotFoundException, InvalidParametersException, MissingRefreshTokenException {
+    public Map<String, String> refresh(String auth, String requestUrl) throws MissingParametersException, InvalidTokenException, UserNotFoundException, InvalidParameterException, MissingRefreshTokenException {
         if(auth==null || !auth.startsWith("Bearer "))
             throw new MissingRefreshTokenException();
 

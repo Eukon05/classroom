@@ -3,13 +3,14 @@ package com.eukon05.classroom.dtos;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
+
 @Getter
 @Setter
 public class AssignmentDataDTO {
 
     private String title;
     private String content;
-    private List<String> links;
+    private Set<String> links;
 
 }

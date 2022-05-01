@@ -22,7 +22,7 @@ public class AssignmentController {
     @GetMapping("assignments")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Returns all assignments for a course")
-    public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int courseId) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    public ResponseEntity<Object> getAssignments(Principal principal, @PathVariable int courseId) throws UserNotFoundException, CourseNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
         return new ResponseEntity<>(assignmentService.getAssignmentsForCourse(principal.getName(), courseId), HttpStatus.OK);
     }
 
@@ -30,7 +30,7 @@ public class AssignmentController {
     @SecurityRequirement(name = "JWT")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new assignment")
-    public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    public ResponseEntity<Object> createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
         assignmentService.createAssignment(principal.getName(), courseId, dto);
         return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
     }
@@ -38,7 +38,7 @@ public class AssignmentController {
     @PutMapping("assignments/{assignmentId}")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Updates the assignment with provided details")
-    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, AssignmentNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    public ResponseEntity<Object> updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDataDTO dto) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, AssignmentNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
         assignmentService.updateAssignment(principal.getName(), courseId, assignmentId, dto);
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
@@ -46,7 +46,7 @@ public class AssignmentController {
     @DeleteMapping("assignments/{assignmentId}")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Deletes the assignment")
-    public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, AssignmentNotFoundException, InvalidParametersException, UserNotAttendingTheCourseException, MissingParametersException {
+    public ResponseEntity<Object> deleteAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId) throws UserNotFoundException, AccessDeniedException, CourseNotFoundException, AssignmentNotFoundException, InvalidParameterException, UserNotAttendingTheCourseException, MissingParametersException {
         assignmentService.deleteAssignment(principal.getName(), courseId, assignmentId);
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }

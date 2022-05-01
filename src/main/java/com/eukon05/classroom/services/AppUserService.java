@@ -5,6 +5,7 @@ import com.eukon05.classroom.domains.AppUserCourse;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.AppUserDTO;
 import com.eukon05.classroom.dtos.AppUserUpdateDTO;
+import com.eukon05.classroom.enums.Param;
 import com.eukon05.classroom.exceptions.*;
 import com.eukon05.classroom.repositories.AppUserCourseRepository;
 import com.eukon05.classroom.repositories.AppUserRepository;
@@ -40,25 +41,33 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         appUserRepository.save(user);
     }
 
-    public void createUser(AppUserDTO appUserDTO) throws MissingParametersException, UsernameTakenException, InvalidParametersException {
-        credentialCheck(appUserDTO.getUsername());
+    public void createUser(AppUserDTO appUserDTO) throws MissingParametersException, UsernameTakenException, InvalidParameterException {
+        isCredentialValid(appUserDTO.getUsername(), Param.username);
 
         Optional<AppUser> tmpUser = appUserRepository.findAppUserByUsername(appUserDTO.getUsername());
 
         if(tmpUser.isPresent())
             throw new UsernameTakenException(appUserDTO.getUsername());
 
-        credentialCheck(appUserDTO.getPassword());
-        valueCheck(appUserDTO.getName());
-        valueCheck(appUserDTO.getSurname());
+        isCredentialValid(appUserDTO.getPassword(), Param.password);
+
+        if(appUserDTO.getName()==null)
+            throw new MissingParametersException(Param.name);
+
+        isValid(appUserDTO.getName().trim(), Param.name);
+
+        if(appUserDTO.getSurname()==null)
+            throw new MissingParametersException(Param.surname);
+
+        isValid(appUserDTO.getSurname().trim(), Param.surname);
 
         AppUser user = new AppUser(appUserDTO.getUsername(), appUserDTO.getPassword(), appUserDTO.getName().trim(), appUserDTO.getSurname().trim());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         appUserRepository.save(user);
     }
 
-    public AppUser getUserByUsername(String username) throws UserNotFoundException, InvalidParametersException, MissingParametersException {
-        credentialCheck(username);
+    public AppUser getUserByUsername(String username) throws UserNotFoundException, InvalidParameterException, MissingParametersException {
+        isCredentialValid(username, Param.username);
 
         Optional<AppUser> user = appUserRepository.findAppUserByUsername(username);
         return user.orElseThrow(() -> new UserNotFoundException(username));
@@ -68,30 +77,34 @@ public class AppUserService extends AbstractResourceService implements UserDetai
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {return getUserByUsername(username);}
         //This is necessary to override the loadUserByUsername method properly, I should think of a cleaner fix though
-        catch (UserNotFoundException | InvalidParametersException | MissingParametersException e){throw new UsernameNotFoundException(e.getMessage());}
+        catch (UserNotFoundException | InvalidParameterException | MissingParametersException e){throw new UsernameNotFoundException(e.getMessage());}
     }
 
-    public void updateUser(String username, AppUserUpdateDTO dto) throws UserNotFoundException, MissingParametersException, InvalidParametersException {
+    public void updateUser(String username, AppUserUpdateDTO dto) throws UserNotFoundException, MissingParametersException, InvalidParameterException {
         AppUser user = getUserByUsername(username);
 
         if(dto.getName() == null && dto.getSurname() == null && dto.getPassword() == null)
             throw new MissingParametersException();
 
         if(dto.getPassword()!=null) {
-            credentialCheck(dto.getPassword());
+            isCredentialValid(dto.getPassword(), Param.password);
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
-        if(dto.getName()!=null)
+        if(dto.getName()!=null) {
+            isValid(dto.getName().trim(), Param.name);
             user.setName(dto.getName().trim());
+        }
 
-        if(dto.getSurname()!=null)
+        if(dto.getSurname()!=null) {
+            isValid(dto.getSurname(), Param.surname);
             user.setSurname(dto.getSurname().trim());
+        }
 
         saveUser(user);
     }
 
-    public void deleteUser(String username) throws UserNotFoundException, MissingParametersException, InvalidParametersException {
+    public void deleteUser(String username) throws UserNotFoundException, MissingParametersException, InvalidParameterException {
         AppUser user = getUserByUsername(username);
         List<Course> courses = new ArrayList<>();
 
@@ -111,7 +124,7 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         appUserRepository.delete(user);
     }
 
-    public List<Course> getUserCourses(String username) throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+    public List<Course> getUserCourses(String username) throws UserNotFoundException, InvalidParameterException, MissingParametersException {
         AppUser user = getUserByUsername(username);
         List<Course> courses = new ArrayList<>();
 
@@ -122,10 +135,10 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         return courses;
     }
 
-    public void joinCourse(String username, String inviteCode) throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, MissingParametersException {
+    public void joinCourse(String username, String inviteCode) throws UserNotFoundException, CourseNotFoundException, InvalidParameterException, MissingParametersException {
         AppUser user = getUserByUsername(username);
 
-        valueCheck(inviteCode);
+        isValid(inviteCode, Param.inviteCode);
 
         Course course = courseService.getCourseByInviteCode(inviteCode);
         appUserCourseRepository.save(addCourse(user, course, false));
@@ -133,10 +146,10 @@ public class AppUserService extends AbstractResourceService implements UserDetai
         appUserRepository.save(user);
     }
 
-    public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
+    public void leaveCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParameterException, MissingParametersException {
         AppUser user = getUserByUsername(username);
 
-        valueCheck(courseId);
+        isValid(courseId, Param.courseId);
 
         Course course = courseService.getCourseById(courseId);
 

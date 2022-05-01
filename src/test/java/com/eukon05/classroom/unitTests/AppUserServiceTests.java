@@ -56,7 +56,7 @@ public class AppUserServiceTests {
     }
 
     @Test
-    void create_user_test() throws InvalidParametersException, UsernameTakenException, MissingParametersException {
+    void create_user_test() throws InvalidParameterException, UsernameTakenException, MissingParametersException {
 
         appUserService.createUser(userOneDto);
         Mockito.verify(appUserRepository).save(Mockito.any(AppUser.class));
@@ -64,7 +64,7 @@ public class AppUserServiceTests {
     }
 
     @Test
-    void get_user_by_username_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+    void get_user_by_username_test() throws UserNotFoundException, InvalidParameterException, MissingParametersException {
 
         Mockito.when(appUserRepository.findAppUserByUsername("testOne"))
                 .thenReturn(Optional.of(new AppUser(userOneDto.getUsername(), userOneDto.getPassword(), userOneDto.getName(), userOneDto.getSurname())));
@@ -74,7 +74,7 @@ public class AppUserServiceTests {
     }
 
     @Test
-    void update_user_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+    void update_user_test() throws UserNotFoundException, InvalidParameterException, MissingParametersException {
 
         AppUser user = new AppUser(userOneDto.getUsername(), userOneDto.getPassword(), userOneDto.getName(), userOneDto.getSurname());
 
@@ -91,7 +91,7 @@ public class AppUserServiceTests {
     }
 
     @Test
-    void get_user_courses_test() throws UserNotFoundException, InvalidParametersException, MissingParametersException {
+    void get_user_courses_test() throws UserNotFoundException, InvalidParameterException, MissingParametersException {
 
         AppUser test = new AppUser(userOneDto.getUsername(), userOneDto.getPassword(), userOneDto.getName(), userOneDto.getSurname());
         test.getCourses().add(new AppUserCourse(test, new Course("course"), false));
@@ -105,7 +105,7 @@ public class AppUserServiceTests {
     }
 
     @Test
-    void join_course_test() throws UserNotFoundException, CourseNotFoundException, InvalidParametersException, MissingParametersException {
+    void join_course_test() throws UserNotFoundException, CourseNotFoundException, InvalidParameterException, MissingParametersException {
 
         AppUser user = new AppUser(userOneDto.getUsername(), userOneDto.getPassword(), userOneDto.getName(), userOneDto.getSurname());
         Course testCourse = new Course("TestCourse");
@@ -127,7 +127,7 @@ public class AppUserServiceTests {
     }
 
     @Test
-    void leave_course_test() throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParametersException, MissingParametersException {
+    void leave_course_test() throws UserNotFoundException, CourseNotFoundException, UserNotAttendingTheCourseException, InvalidParameterException, MissingParametersException {
 
         AppUser user = new AppUser(userOneDto.getUsername(), userOneDto.getPassword(), userOneDto.getName(), userOneDto.getSurname());
 
