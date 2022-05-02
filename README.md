@@ -1,24 +1,20 @@
 <h1>Classroom API</h1>
+A simple assignment management API, inspired by Google Classroom
 
-<h2>Purpose</h2>
-This project is meant to represent my current abilities in creating RESTful API's using Spring Boot.
-<br>
-The list of available endpoints is available after running the app, on this url:
-<br><br>
-`http://yourserveradress:8080/api/v1/swagger-ui.html`
-<br><br>
-[You can demo the API here](https://eukon-classroom.herokuapp.com/api/v1/swagger-ui.html)
-<h2>Functionality</h2>
-This API allows its users to create "courses", (aka groups), in which short assignments can be shared by the course's "teacher" (aka admin).
-<br><br>
-Each assignment consists of a title, a description and optionally a list of urls that the "students" (aka users) should take a look at.
-<br>
-The urls functionality could in the future be expanded to support file upload as well.
-<br><br>
-Every course has at least one teacher, but more can be added from the list of attending students.
-<br><br>
-The students can join courses by using a 6 character invite code, that the teacher needs to send them.
-<br>
-Only the teacher can create new assignments, but every student in the course can read them.
-<br><br>
-Every user has the ability to create his own course.
+<h2>Disclaimer</h2>
+This project is meant to represent my current skills at creating RESTful APIs using Spring Boot. <br>
+It is still in development, so there is probably a lot of bugs and some features may not work as intended.<br>
+I'll try to bring this application to the best possible state before eventually moving on to another project.
+
+<h2>Features</h2>
+This application allows its users to create and join "courses" - groups, in which the admin can share content for the other users to see.
+
+Every user can create their own course, and invite to join as many users as they like, by sending them a 6 character invite code, which is unique to every course.
+
+By default, the only admin of a course is it's creator, but they can make any other attending user an admin as well.
+
+<h2>Running the app</h2>
+For now, there isn't a straightforward way to run the app, other than building it from source.<br>
+I'll provide a Docker image in the future.
+
+[You can try the app out by visiting this link, though](https://eukon-classroom.herokuapp.com/api/v1/swagger-ui.html)

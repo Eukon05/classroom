@@ -2,33 +2,41 @@ package com.eukon05.classroom.services;
 
 import com.eukon05.classroom.builders.InvalidParameterExceptionBuilder;
 import com.eukon05.classroom.enums.ExceptionType;
-import com.eukon05.classroom.enums.Param;
+import com.eukon05.classroom.enums.ParamType;
 import com.eukon05.classroom.exceptions.InvalidParameterException;
 import com.eukon05.classroom.exceptions.MissingParametersException;
 
 public abstract class AbstractResourceService {
 
-    protected void isValid(String value, Param param) throws MissingParametersException, InvalidParameterException {
+    protected String checkStringAndTrim(String value, ParamType paramType) throws MissingParametersException, InvalidParameterException {
         if(value == null)
-            throw new MissingParametersException(param);
+            throw new MissingParametersException(paramType);
 
-        else if(value.isEmpty())
-            throw new InvalidParameterExceptionBuilder(ExceptionType.empty, param).build();
+        String trimmed = value.trim();
 
-        else if(value.length()>param.number)
-            throw new InvalidParameterExceptionBuilder(ExceptionType.tooLong, param).build();
+        if(trimmed.isEmpty())
+            throw new InvalidParameterExceptionBuilder(ExceptionType.empty, paramType).build();
+
+        else if(trimmed.length() > paramType.length)
+            throw new InvalidParameterExceptionBuilder(ExceptionType.tooLong, paramType).build();
+
+        return trimmed;
     }
 
-    protected void isValid(Object value, Param param) throws MissingParametersException {
+    protected void checkObject(Object value, ParamType paramType) throws MissingParametersException {
         if(value == null)
-            throw new MissingParametersException(param);
+            throw new MissingParametersException(paramType);
     }
 
-    protected void isCredentialValid(String credential, Param param) throws MissingParametersException, InvalidParameterException {
-        isValid(credential, param);
+    protected void checkCredential(String credential, ParamType paramType) throws MissingParametersException, InvalidParameterException {
+        //I know we are checking if credential == null two times, but credentials can't contain ANY spaces, so the checkStringAndTrim method must be called last
+        if(credential == null)
+            throw new MissingParametersException(paramType);
 
         if (credential.contains(" "))
-            throw new InvalidParameterExceptionBuilder(ExceptionType.spaces, param).build();
+            throw new InvalidParameterExceptionBuilder(ExceptionType.spaces, paramType).build();
+
+        checkStringAndTrim(credential, paramType);
     }
 
 }

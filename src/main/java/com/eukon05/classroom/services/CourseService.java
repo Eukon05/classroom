@@ -6,7 +6,7 @@ import com.eukon05.classroom.domains.AppUserCourse;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.CourseUserDTO;
 import com.eukon05.classroom.enums.ExceptionType;
-import com.eukon05.classroom.enums.Param;
+import com.eukon05.classroom.enums.ParamType;
 import com.eukon05.classroom.exceptions.*;
 import com.eukon05.classroom.repositories.AppUserCourseRepository;
 import com.eukon05.classroom.repositories.CourseRepository;
@@ -38,17 +38,17 @@ public class CourseService extends AbstractResourceService{
     }
 
     Course getCourseByInviteCode(String inviteCode) throws CourseNotFoundException, MissingParametersException, InvalidParameterException {
-        isValid(inviteCode, Param.inviteCode);
+        String trimmed = checkStringAndTrim(inviteCode, ParamType.inviteCode);
 
-        if(inviteCode.length()<6)
-            throw new InvalidParameterExceptionBuilder(ExceptionType.tooShort, Param.inviteCode).build();
+        if(trimmed.length()<6)
+            throw new InvalidParameterExceptionBuilder(ExceptionType.tooShort, ParamType.inviteCode).build();
 
-        Optional<Course> courseOptional = courseRepository.findCourseByInviteCode(inviteCode);
-        return courseOptional.orElseThrow(() -> new CourseNotFoundException(inviteCode));
+        Optional<Course> courseOptional = courseRepository.findCourseByInviteCode(trimmed);
+        return courseOptional.orElseThrow(() -> new CourseNotFoundException(trimmed));
     }
 
     Course getCourseById(int id) throws CourseNotFoundException, MissingParametersException {
-        isValid(id, Param.courseId);
+        checkObject(id, ParamType.courseId);
         Optional<Course> courseOptional = courseRepository.findById(id);
         return courseOptional.orElseThrow(() -> new CourseNotFoundException(id));
     }
@@ -56,20 +56,17 @@ public class CourseService extends AbstractResourceService{
     public void createCourse(String username, String courseName) throws MissingParametersException, UserNotFoundException, InvalidParameterException {
         AppUser appUser = appUserService.getUserByUsername(username);
 
-        if(courseName==null)
-            throw new MissingParametersException(Param.courseName);
+        courseName = checkStringAndTrim(courseName, ParamType.courseName);
 
-        isValid(courseName.trim(), Param.courseName);
-
-        Course course = new Course(courseName.trim());
+        Course course = new Course(courseName);
         Optional<Course> tmp;
         String random;
 
         do {
             random = generateCourseKey();
             tmp = courseRepository.findCourseByInviteCode(random);
-
-        } while (tmp.isPresent());
+        }
+        while (tmp.isPresent());
 
         course.setInviteCode(random);
 
@@ -107,7 +104,7 @@ public class CourseService extends AbstractResourceService{
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        isValid(newName.trim(), Param.courseName);
+        newName = checkStringAndTrim(newName.trim(), ParamType.courseName);
 
         course.setName(newName.trim());
 
@@ -120,6 +117,9 @@ public class CourseService extends AbstractResourceService{
         Course course = getCourseById(courseId);
 
         getAppUserCourse(appUser, course);
+
+        //We need to return the users in their DTO form,
+        //because we have to include the isTeacher value
 
         List<CourseUserDTO> users = new ArrayList<>();
 
@@ -138,9 +138,9 @@ public class CourseService extends AbstractResourceService{
 
     public void updateUserRoleInCourse(String principalUsername, int courseId, String username, boolean isTeacher) throws UserNotFoundException, InvalidParameterException, MissingParametersException, CourseNotFoundException, AccessDeniedException, UserNotAttendingTheCourseException {
         if(principalUsername.equals(username))
-            throw new InvalidParameterExceptionBuilder(ExceptionType.selfRoleChange, Param.username).build();
+            throw new InvalidParameterExceptionBuilder(ExceptionType.selfRoleChange, ParamType.username).build();
 
-        isValid(isTeacher, Param.isTeacher);
+        checkObject(isTeacher, ParamType.isTeacher);
 
         AppUser appUser = appUserService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);

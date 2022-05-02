@@ -5,7 +5,7 @@ import com.eukon05.classroom.domains.AppUserCourse;
 import com.eukon05.classroom.domains.Assignment;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.AssignmentDataDTO;
-import com.eukon05.classroom.enums.Param;
+import com.eukon05.classroom.enums.ParamType;
 import com.eukon05.classroom.exceptions.*;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -28,6 +28,8 @@ public class AssignmentService extends AbstractResourceService{
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
+        //This line serves as a check for if the users is attending the course.
+        //It will be used multiple times in this class, so I wanted to clarify what it is for.
         courseService.getAppUserCourse(appUser, course);
 
         return course.getAssignments();
@@ -38,23 +40,19 @@ public class AssignmentService extends AbstractResourceService{
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        isValid(dto.getTitle().trim(), Param.title);
+        dto.setTitle(checkStringAndTrim(dto.getTitle(), ParamType.title));
 
-        //this is a dumb check to avoid throwing an exception when the assignment's content is empty
-        //if the content isn't empty, we check if it fits in the specified character limit (isValid)
-        String trimmed = "";
-
-        if(dto.getContent()!=null) {
-            isValid(dto.getContent().trim(), Param.content);
-            trimmed = dto.getContent().trim();
-        }
+        if(dto.getContent()!=null)
+            dto.setContent(checkStringAndTrim(dto.getContent(), ParamType.content));
+        else
+            dto.setContent("");
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
 
         if(!auc.isTeacher())
             throw new AccessDeniedException();
 
-        course.getAssignments().add(new Assignment(dto.getTitle().trim(), trimmed, dto.getLinks()));
+        course.getAssignments().add(new Assignment(dto.getTitle(), dto.getContent(), dto.getLinks()));
         courseService.saveCourse(course);
 
     }
@@ -75,18 +73,14 @@ public class AssignmentService extends AbstractResourceService{
             throw new MissingParametersException();
 
         if(dto.getTitle() != null) {
-            isValid(dto.getTitle().trim(), Param.title);
-            assignment.setTitle(dto.getTitle().trim());
+            assignment.setTitle(checkStringAndTrim(dto.getTitle(), ParamType.title));
         }
 
-        //again, a "brilliant" way of solving a problem with an empty content field
         if(dto.getContent() != null) {
             if(dto.getContent().trim().isEmpty())
                 assignment.setContent("");
-            else {
-                isValid(dto.getContent().trim(), Param.content);
-                assignment.setContent(dto.getContent().trim());
-            }
+            else
+                assignment.setContent(checkStringAndTrim(dto.getContent(), ParamType.content));
         }
 
         if(dto.getLinks() != null)
@@ -100,7 +94,7 @@ public class AssignmentService extends AbstractResourceService{
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        isValid(assignmentId, Param.assignmentId);
+        checkObject(assignmentId, ParamType.assignmentId);
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
 

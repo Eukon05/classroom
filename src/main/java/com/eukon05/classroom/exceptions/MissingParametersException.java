@@ -1,14 +1,14 @@
 package com.eukon05.classroom.exceptions;
 
-import com.eukon05.classroom.enums.Param;
+import com.eukon05.classroom.enums.ParamType;
 
 public class MissingParametersException extends Exception{
 
     public MissingParametersException(){
         super("Missing parameters");
     }
-    public MissingParametersException(Param param){
-        super("Missing parameter: " + param.name());
+    public MissingParametersException(ParamType paramType){
+        super("Missing parameter: " + paramType.name());
     }
 
 }
