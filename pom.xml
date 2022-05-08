@@ -14,7 +14,7 @@
 	<name>classroom</name>
 	<description>classroom</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -81,13 +81,13 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.6.7</version>
+			<version>1.6.8</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>8.5.9</version>
+			<version>8.5.10</version>
 		</dependency>
 
 	</dependencies>

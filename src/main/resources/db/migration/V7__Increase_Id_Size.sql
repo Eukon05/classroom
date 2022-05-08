@@ -1,0 +1,10 @@
+ALTER TABLE course ALTER COLUMN id TYPE BIGINT;
+ALTER TABLE assignment ALTER COLUMN id TYPE BIGINT;
+ALTER TABLE appuser_course ALTER COLUMN course_id TYPE BIGINT;
+ALTER TABLE appuser_courses ALTER COLUMN courses_course_id TYPE BIGINT;
+ALTER TABLE course_app_users ALTER COLUMN course_id TYPE BIGINT;
+ALTER TABLE course_app_users ALTER COLUMN app_users_course_id TYPE BIGINT;
+ALTER TABLE assignment ALTER COLUMN id TYPE BIGINT;
+ALTER TABLE course_assignments ALTER COLUMN course_id TYPE BIGINT;
+ALTER TABLE course_assignments ALTER COLUMN assignments_id TYPE BIGINT;
+ALTER TABLE assignment_links ALTER COLUMN assignment_id TYPE BIGINT;

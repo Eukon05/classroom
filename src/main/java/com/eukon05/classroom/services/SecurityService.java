@@ -2,7 +2,11 @@ package com.eukon05.classroom.services;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.eukon05.classroom.domains.AppUser;
-import com.eukon05.classroom.exceptions.*;
+import com.eukon05.classroom.enums.JWTFinals;
+import com.eukon05.classroom.exceptions.AccessDeniedException;
+import com.eukon05.classroom.exceptions.InvalidTokenException;
+import com.eukon05.classroom.exceptions.MissingParametersException;
+import com.eukon05.classroom.exceptions.MissingRefreshTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,12 +19,11 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class SecurityService {
-
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
     private final AppUserService appUserService;
 
-    public Map<String, String> authenticate(String username, String password, String requestUrl) throws AccessDeniedException, MissingParametersException {
+    public Map<String, String> authenticate(String username, String password, String requestUrl){
         if(username == null || password == null)
             throw new MissingParametersException();
 
@@ -39,13 +42,13 @@ public class SecurityService {
         return tokens;
     }
 
-    public Map<String, String> refresh(String auth, String requestUrl) throws MissingParametersException, InvalidTokenException, UserNotFoundException, InvalidParameterException, MissingRefreshTokenException {
-        if(auth==null || !auth.startsWith("Bearer "))
+    public Map<String, String> refresh(String auth, String requestUrl){
+        if(auth==null || !auth.startsWith(JWTFinals.TOKEN_PREFIX.value))
             throw new MissingRefreshTokenException();
 
         DecodedJWT jwt = jwtService.verifyAndReturnToken(auth);
 
-        if(!jwt.getClaim("type").asString().equals("refresh"))
+        if(!JWTFinals.REFRESH.value.equals(jwt.getClaim("type").asString()))
             throw new InvalidTokenException();
 
         String username = jwt.getSubject();
@@ -55,7 +58,7 @@ public class SecurityService {
         AppUser user = appUserService.getUserByUsername(username);
         Map<String, String> tokens = new HashMap<>();
         tokens.put("access_token", jwtService.createAccessToken(user.getUsername(), requestUrl));
-        tokens.put("refresh_token", auth.replace("Bearer ", ""));
+        tokens.put("refresh_token", auth.replace(JWTFinals.TOKEN_PREFIX.value, ""));
 
         return tokens;
     }

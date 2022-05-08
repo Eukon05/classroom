@@ -11,9 +11,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonIgnoreProperties(value= {"appUsers", "assignments"})
+@JsonIgnoreProperties(value= {"appUserCourses", "assignments"})
 @Getter
-@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "COURSE")
@@ -23,20 +22,20 @@ public class Course {
     @Id
     @GenericGenerator(name = "inc", strategy = "increment")
     @GeneratedValue(generator = "inc")
-    private Integer id;
-
+    private Long id;
+    @Setter
     private String name;
-
     private String inviteCode;
 
-    @OneToMany
-    private List<AppUserCourse> appUsers = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course")
+    private final List<AppUserCourse> appUserCourses = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Assignment> assignments = new ArrayList<>();
+    private final List<Assignment> assignments = new ArrayList<>();
 
-    public Course(String name){
-        this.name=name;
+    public Course(String name, String inviteCode){
+        this.name = name;
+        this.inviteCode = inviteCode;
     }
 
 }

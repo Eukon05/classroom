@@ -1,6 +1,7 @@
 package com.eukon05.classroom.filters;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.eukon05.classroom.enums.JWTFinals;
 import com.eukon05.classroom.exceptions.InvalidTokenException;
 import com.eukon05.classroom.services.JWTService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String auth = httpServletRequest.getHeader("Authorization");
 
-        if(auth==null || !auth.startsWith("Bearer ")) {
+        if(auth==null || !auth.startsWith(JWTFinals.TOKEN_PREFIX.value)) {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
@@ -36,7 +37,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         try {
             DecodedJWT jwt = jwtService.verifyAndReturnToken(auth);
 
-            if(!jwt.getClaim("type").asString().equals("access"))
+            if(!JWTFinals.ACCESS.value.equals(jwt.getClaim("type").asString()))
                 throw new InvalidTokenException();
 
             String username = jwt.getSubject();

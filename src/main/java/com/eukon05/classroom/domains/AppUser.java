@@ -8,17 +8,13 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@JsonIgnoreProperties(value={"password", "courses", "credentialsNonExpired", "accountNonExpired", "enabled", "authorities", "accountNonLocked"})
+@JsonIgnoreProperties(value={"password", "appUserCourses", "credentialsNonExpired", "accountNonExpired", "enabled", "authorities", "accountNonLocked"})
 @Getter
-@Setter
 @NoArgsConstructor
 @EqualsAndHashCode
 @Entity
@@ -27,14 +23,15 @@ public class AppUser implements UserDetails {
 
     @Id
     private String username;
-
+    @Setter
     private String password;
-
+    @Setter
     private String name;
+    @Setter
     private String surname;
 
-    @OneToMany
-    private List<AppUserCourse> courses = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "appUser")
+    private final List<AppUserCourse> appUserCourses = new ArrayList<>();
 
     public AppUser(String username, String password, String name, String surname){
         this.username=username;

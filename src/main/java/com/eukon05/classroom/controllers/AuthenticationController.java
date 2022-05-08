@@ -1,19 +1,14 @@
 package com.eukon05.classroom.controllers;
 
 import com.eukon05.classroom.dtos.CredentialsDTO;
-import com.eukon05.classroom.exceptions.AccessDeniedException;
-import com.eukon05.classroom.exceptions.MissingParametersException;
 import com.eukon05.classroom.services.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/authenticate")
@@ -24,8 +19,9 @@ public class AuthenticationController {
 
     @PostMapping
     @Operation(summary = "Allows the user to retrieve an auth token to use for all other operations")
-    ResponseEntity<Object> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request) throws AccessDeniedException, MissingParametersException {
-        return new ResponseEntity<>(securityService.authenticate(dto.getUsername(), dto.getPassword(), request.getRequestURL().toString()), HttpStatus.OK);
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, String> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request){
+        return securityService.authenticate(dto.getUsername(), dto.getPassword(), request.getRequestURL().toString());
     }
 
 

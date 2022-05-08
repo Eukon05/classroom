@@ -6,25 +6,28 @@ import com.eukon05.classroom.domains.Assignment;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.AssignmentDataDTO;
 import com.eukon05.classroom.enums.ParamType;
-import com.eukon05.classroom.exceptions.*;
+import com.eukon05.classroom.exceptions.AccessDeniedException;
+import com.eukon05.classroom.exceptions.AssignmentNotFoundException;
+import com.eukon05.classroom.exceptions.MissingParametersException;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+
+import static com.eukon05.classroom.ParamUtils.checkObject;
+import static com.eukon05.classroom.ParamUtils.checkStringAndTrim;
 
 @Service
 @RequiredArgsConstructor
-public class AssignmentService extends AbstractResourceService{
+public class AssignmentService {
 
-    @Setter
-    private AppUserService appUserService;
-
-    @Setter
-    private CourseService courseService;
+    private final AppUserService appUserService;
+    private final CourseService courseService;
 
 
-    public List<Assignment> getAssignmentsForCourse(String username, int courseId) throws UserNotFoundException, CourseNotFoundException, InvalidParameterException, MissingParametersException, UserNotAttendingTheCourseException {
+    public List<Assignment> getAssignmentsForCourse(String username, long courseId){
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
@@ -35,62 +38,61 @@ public class AssignmentService extends AbstractResourceService{
         return course.getAssignments();
     }
 
-    public void createAssignment(String username, int courseId, AssignmentDataDTO dto)
-            throws UserNotFoundException, CourseNotFoundException, MissingParametersException, AccessDeniedException, InvalidParameterException, UserNotAttendingTheCourseException {
+    @Transactional
+    public void createAssignment(String username, long courseId, AssignmentDataDTO dto){
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        dto.setTitle(checkStringAndTrim(dto.getTitle(), ParamType.title));
-
-        if(dto.getContent()!=null)
-            dto.setContent(checkStringAndTrim(dto.getContent(), ParamType.content));
-        else
-            dto.setContent("");
+        final StringBuilder contentBuilder = new StringBuilder();
+        Optional.ofNullable(dto.getContent()).ifPresent(content -> {
+            //This line bypasses the empty string check in checkStringAndTrim()
+            if(!content.trim().isEmpty()) {
+                contentBuilder.append(checkStringAndTrim(content, ParamType.content));
+            }
+        });
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
 
-        if(!auc.isTeacher())
+        if(!auc.isTeacher()) {
             throw new AccessDeniedException();
+        }
 
-        course.getAssignments().add(new Assignment(dto.getTitle(), dto.getContent(), dto.getLinks()));
-        courseService.saveCourse(course);
-
+        course.getAssignments().add(new Assignment(checkStringAndTrim(dto.getTitle(), ParamType.title), contentBuilder.toString(), dto.getLinks()));
     }
 
-    public void updateAssignment(String username, int courseId, int assignmentId, AssignmentDataDTO dto)
-            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, MissingParametersException, InvalidParameterException, UserNotAttendingTheCourseException {
+    @Transactional
+    public void updateAssignment(String username, long courseId, long assignmentId, AssignmentDataDTO dto){
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
 
-        if(!auc.isTeacher())
+        if(!auc.isTeacher()) {
             throw new AccessDeniedException();
+        }
 
         Assignment assignment = getAssignmentById(assignmentId, course);
 
         if(dto.getTitle() == null && dto.getContent() == null && dto.getLinks() == null)
             throw new MissingParametersException();
 
-        if(dto.getTitle() != null) {
-            assignment.setTitle(checkStringAndTrim(dto.getTitle(), ParamType.title));
-        }
+        Optional.ofNullable(dto.getTitle()).ifPresent(title -> assignment.setTitle(checkStringAndTrim(title, ParamType.title)));
 
-        if(dto.getContent() != null) {
-            if(dto.getContent().trim().isEmpty())
+        Optional.ofNullable(dto.getContent()).ifPresent(content -> {
+            //This line bypasses the empty string check in checkStringAndTrim()
+            if(content.trim().isEmpty()) {
                 assignment.setContent("");
-            else
-                assignment.setContent(checkStringAndTrim(dto.getContent(), ParamType.content));
-        }
+            }
+            else {
+                assignment.setContent(checkStringAndTrim(content, ParamType.content));
+            }
+        });
 
-        if(dto.getLinks() != null)
-            assignment.setLinks(dto.getLinks());
-
-        courseService.saveCourse(course);
+        Optional.ofNullable(dto.getLinks()).ifPresent(links -> assignment.setLinks(links));
     }
 
-    public void deleteAssignment(String username, int courseId, int assignmentId)
-            throws UserNotFoundException, CourseNotFoundException, AccessDeniedException, AssignmentNotFoundException, InvalidParameterException, MissingParametersException, UserNotAttendingTheCourseException {
+    @Transactional
+    public void deleteAssignment(String username, long courseId, long assignmentId){
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
@@ -98,30 +100,19 @@ public class AssignmentService extends AbstractResourceService{
 
         AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
 
-        if(!auc.isTeacher())
+        if(!auc.isTeacher()) {
             throw new AccessDeniedException();
+        }
 
         course.getAssignments().remove(getAssignmentById(assignmentId, course));
-        courseService.saveCourse(course);
     }
 
-    private Assignment getAssignmentById(int assignmentId, Course course) throws AssignmentNotFoundException {
-        for(Assignment assignment : course.getAssignments()){
-            if(assignment.getId()==assignmentId){
-                return assignment;
-            }
-        }
-        throw new AssignmentNotFoundException();
-    }
-
-    void deleteAllAssignmentsFromCourse(Course course){
-        try {
-            course.getAssignments().clear();
-            courseService.saveCourse(course);
-        }
-        catch (Exception ex){
-            ex.printStackTrace();
-        }
+    private Assignment getAssignmentById(long assignmentId, Course course){
+        return course.getAssignments()
+                .stream()
+                .filter(assignment -> assignment.getId()==assignmentId)
+                .findFirst()
+                .orElseThrow(() -> new AssignmentNotFoundException(assignmentId));
     }
 
 }

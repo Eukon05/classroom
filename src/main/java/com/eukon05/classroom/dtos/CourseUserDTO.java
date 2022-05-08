@@ -1,15 +1,17 @@
 package com.eukon05.classroom.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CourseUserDTO {
 
     private String username;
     private String name;
     private String surname;
-    private boolean isTeacher;
+    private Boolean isTeacher;
 
 }

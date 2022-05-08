@@ -1,12 +1,14 @@
 package com.eukon05.classroom.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
 @Getter
-@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class AssignmentDataDTO {
 
     private String title;

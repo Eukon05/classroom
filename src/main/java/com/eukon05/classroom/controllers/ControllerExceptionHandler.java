@@ -25,24 +25,24 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
             UsernameTakenException.class,
             MissingRefreshTokenException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected ResponseEntity<Object> badRequestHandler(Exception ex){
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    protected String badRequestHandler(Exception ex){
+        return ex.getMessage();
     }
 
     @ExceptionHandler(value = {AccessDeniedException.class,
             UserNotAttendingTheCourseException.class,
             InvalidTokenException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    protected ResponseEntity<Object> accessDeniedHandler(Exception ex){
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    protected String accessDeniedHandler(Exception ex){
+        return ex.getMessage();
     }
 
     @ExceptionHandler(value = {UserNotFoundException.class,
     CourseNotFoundException.class,
     AssignmentNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    protected ResponseEntity<Object> resourceNotFoundHandler(Exception ex){
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    protected String resourceNotFoundHandler(Exception ex){
+        return ex.getMessage();
     }
 
 }

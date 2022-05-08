@@ -1,9 +1,9 @@
 package com.eukon05.classroom.exceptions;
 
-public class AssignmentNotFoundException extends Exception{
+public class AssignmentNotFoundException extends RuntimeException{
 
-    public AssignmentNotFoundException(){
-        super("This assignments doesn't exist");
+    public AssignmentNotFoundException(long assignmentId){
+        super("Assignment with id " + assignmentId + " does not exist");
     }
 
 }
