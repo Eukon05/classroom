@@ -23,7 +23,7 @@ public class AssignmentController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Returns all assignments for a course")
     @ResponseStatus(HttpStatus.OK)
-    public List<Assignment> getAssignments(Principal principal, @PathVariable int courseId){
+    public List<Assignment> getAssignments(Principal principal, @PathVariable long courseId){
         return assignmentService.getAssignmentsForCourse(principal.getName(), courseId);
     }
 
@@ -31,7 +31,7 @@ public class AssignmentController {
     @SecurityRequirement(name = "JWT")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new assignment")
-    public String createAssignment(Principal principal, @PathVariable int courseId, @RequestBody AssignmentDataDTO dto){
+    public String createAssignment(Principal principal, @PathVariable long courseId, @RequestBody AssignmentDataDTO dto){
         assignmentService.createAssignment(principal.getName(), courseId, dto);
         return "SUCCESS";
     }
@@ -40,7 +40,7 @@ public class AssignmentController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Updates the assignment with provided details")
     @ResponseStatus(HttpStatus.OK)
-    public String updateAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId, @RequestBody AssignmentDataDTO dto){
+    public String updateAssignment(Principal principal, @PathVariable long courseId, @PathVariable long assignmentId, @RequestBody AssignmentDataDTO dto){
         assignmentService.updateAssignment(principal.getName(), courseId, assignmentId, dto);
         return "SUCCESS";
     }
@@ -49,7 +49,7 @@ public class AssignmentController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Deletes the assignment")
     @ResponseStatus(HttpStatus.OK)
-    public String deleteAssignment(Principal principal, @PathVariable int courseId, @PathVariable int assignmentId){
+    public String deleteAssignment(Principal principal, @PathVariable long courseId, @PathVariable long assignmentId){
         assignmentService.deleteAssignment(principal.getName(), courseId, assignmentId);
         return "SUCCESS";
     }

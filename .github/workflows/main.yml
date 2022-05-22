@@ -7,6 +7,7 @@ on:
       - 'src/**'
       - 'pom.xml'
       - 'Procfile'
+      - 'Dockerfile'
       - 'system.properties'
 
 jobs:

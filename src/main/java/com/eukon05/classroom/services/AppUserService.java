@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.eukon05.classroom.ParamUtils.*;
 
@@ -66,8 +67,9 @@ public class AppUserService implements UserDetailsService {
     public void updateUser(String username, AppUserUpdateDTO dto){
         AppUser user = getUserByUsername(username);
 
-        if(dto.getName() == null && dto.getSurname() == null && dto.getPassword() == null)
+        if(dto.getName() == null && dto.getSurname() == null && dto.getPassword() == null) {
             throw new MissingParametersException();
+        }
 
         Optional.ofNullable(dto.getPassword()).ifPresent(password -> {
             checkCredential(password, ParamType.password);
@@ -104,13 +106,7 @@ public class AppUserService implements UserDetailsService {
 
     public List<Course> getUserCourses(String username){
         AppUser user = getUserByUsername(username);
-        List<Course> courses = new ArrayList<>();
-
-        for(AppUserCourse appUserCourse : user.getAppUserCourses()){
-            courses.add(appUserCourse.getCourse());
-        }
-
-        return courses;
+        return user.getAppUserCourses().stream().map(auc -> auc.getCourse()).collect(Collectors.toList());
     }
 
     @Transactional
@@ -145,9 +141,13 @@ public class AppUserService implements UserDetailsService {
 
     void addCourse(AppUser user, Course course, boolean isTeacher){
         AppUserCourse appUserCourse = new AppUserCourse(user, course, isTeacher);
+
+        if(user.getAppUserCourses().contains(appUserCourse)){
+            throw new UserAlreadyAttendingTheCourseException(user.getUsername(), course.getId());
+        }
+
         user.getAppUserCourses().add(appUserCourse);
         course.getAppUserCourses().add(appUserCourse);
-
     }
 
 
@@ -164,19 +164,8 @@ public class AppUserService implements UserDetailsService {
     }
 
     private void reassignTeacher(Course course) {
-        boolean courseStillHasATeacher = false;
-
-        for(AppUserCourse auc2 : course.getAppUserCourses()){
-            if(auc2.isTeacher()) {
-                courseStillHasATeacher = true;
-                break;
-            }
-        }
-
-        if(!courseStillHasATeacher){
-            AppUserCourse newTeacher = course.getAppUserCourses().stream().findFirst().get();
-            newTeacher.setTeacher(true);
-        }
+        course.getAppUserCourses().stream().filter(auc2 -> auc2.isTeacher())
+                .findFirst().ifPresentOrElse(user -> {}, () -> course.getAppUserCourses().get(0).setTeacher(true));
     }
 
 

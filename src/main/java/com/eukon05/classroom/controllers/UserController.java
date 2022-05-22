@@ -79,7 +79,7 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Allows the user to leave a specified course")
     @ResponseStatus(HttpStatus.OK)
-    public String leaveCourse(Principal principal, @PathVariable int id){
+    public String leaveCourse(Principal principal, @PathVariable long id){
         appUserService.leaveCourse(principal.getName(), id);
         return "SUCCESS";
     }

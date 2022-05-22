@@ -26,7 +26,7 @@ public class Assignment {
     @Setter
     private String content;
 
-    @ElementCollection()
+    @ElementCollection
     @Setter
     private Set<String> links = new HashSet<>();
 

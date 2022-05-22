@@ -23,7 +23,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {InvalidParameterException.class,
             MissingParametersException.class,
             UsernameTakenException.class,
-            MissingRefreshTokenException.class})
+            MissingRefreshTokenException.class,
+            UserAlreadyAttendingTheCourseException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected String badRequestHandler(Exception ex){
         return ex.getMessage();

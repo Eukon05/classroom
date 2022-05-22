@@ -27,8 +27,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-
+        http.csrf().disable().cors()
+                .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/api/v1/authenticate").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/refresh").permitAll()
@@ -38,13 +38,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET,"/api/v1/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
-
                 .logout().invalidateHttpSession(true).clearAuthentication(true).permitAll()
                 .and()
-
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 

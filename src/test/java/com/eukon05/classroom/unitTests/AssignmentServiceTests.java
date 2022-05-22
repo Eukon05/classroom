@@ -6,7 +6,6 @@ import com.eukon05.classroom.domains.Assignment;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.AssignmentDataDTO;
 import com.eukon05.classroom.exceptions.*;
-import com.eukon05.classroom.repositories.AppUserCourseRepository;
 import com.eukon05.classroom.repositories.CourseRepository;
 import com.eukon05.classroom.services.AppUserService;
 import com.eukon05.classroom.services.AssignmentService;
@@ -22,115 +21,85 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AssignmentServiceTests {
 
-    private CourseService courseService;
     private AssignmentService assignmentService;
     private CourseRepository courseRepository;
     private AppUserService appUserService;
-    private AppUserCourseRepository aucRepository;
+
 
     @BeforeEach
     void initService(){
-
         courseRepository = Mockito.mock(CourseRepository.class);
-        aucRepository = Mockito.mock(AppUserCourseRepository.class);
         appUserService = Mockito.mock(AppUserService.class);
-
-        assignmentService = new AssignmentService();
-
-        courseService = Mockito.spy(new CourseService(courseRepository, aucRepository, assignmentService));
-        courseService.setAppUserService(appUserService);
-
+        assignmentService = new AssignmentService(appUserService, Mockito.spy(new CourseService(courseRepository, appUserService)));
     }
 
     @Test
     void create_assignment_test() throws UserNotFoundException, InvalidParameterException, MissingParametersException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException {
-
         AppUser user = new AppUser("testOne", "testpass", "test", "one");
+        Course course = new Course("course", "tstcod");
 
-        Course course = new Course("course");
-        course.setId(1);
-
-        course.getAppUsers().add(new AppUserCourse(user, course, true));
+        course.getAppUserCourses().add(new AppUserCourse(user, course, true));
 
         Mockito.when(appUserService.getUserByUsername(Mockito.anyString()))
                 .thenReturn(user);
 
-        Mockito.when(courseRepository.findById(Mockito.anyInt()))
+        Mockito.when(courseRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(course));
 
-        AssignmentDataDTO dto = new AssignmentDataDTO();
-        dto.setTitle("test assignment");
-        dto.setContent("test content");
-        dto.setLinks(new HashSet<>());
+        AssignmentDataDTO dto = new AssignmentDataDTO("test assignment", "test content", new HashSet<>());
         dto.getLinks().add("https://github.com/Eukon05");
 
-        assignmentService.createAssignment("testOne", 1, dto);
-        Mockito.verify(courseRepository).save(Mockito.any(Course.class));
+        assignmentService.createAssignment("testOne", 1L, dto);
         assertEquals(1, course.getAssignments().size());
-
     }
 
     @Test
     void update_assignment_test() throws UserNotFoundException, InvalidParameterException, MissingParametersException, AccessDeniedException, CourseNotFoundException, UserNotAttendingTheCourseException, AssignmentNotFoundException {
-
         AppUser user = new AppUser("testOne", "testpass", "test", "one");
+        Course course = new Course("course", "tstcod");
 
-        Course course = new Course("course");
-        course.setId(1);
-
-        course.getAppUsers().add(new AppUserCourse(user, course, true));
-
-        Assignment assignment = new Assignment("test", "test", null);
-        assignment.setId(1);
-
-        course.getAssignments().add(assignment);
+        course.getAppUserCourses().add(new AppUserCourse(user, course, true));
 
         Mockito.when(appUserService.getUserByUsername(Mockito.anyString()))
                 .thenReturn(user);
 
-        Mockito.when(courseRepository.findById(Mockito.anyInt()))
+        Mockito.when(courseRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(course));
 
-        AssignmentDataDTO dto = new AssignmentDataDTO();
-        dto.setTitle("test assignment");
-        dto.setContent("test content");
-        dto.setLinks(new HashSet<>());
-        dto.getLinks().add("https://github.com/Eukon05");
+        Assignment assignment = Mockito.spy(new Assignment("test", "test", null));
+        course.getAssignments().add(assignment);
 
-        assignmentService.updateAssignment("testOne", 1, 1, dto);
-        Mockito.verify(courseRepository).save(course);
+        Mockito.when(assignment.getId()).thenReturn(1L);
+
+        AssignmentDataDTO dto = new AssignmentDataDTO("test assignment", "test content", new HashSet<>());
+
+        assignmentService.updateAssignment("testOne", 1L, 1L, dto);
 
         assertEquals("test assignment", assignment.getTitle());
         assertEquals("test content", assignment.getContent());
         assertEquals(dto.getLinks(), assignment.getLinks());
-
     }
 
     @Test
     void delete_assignment_test() throws UserNotFoundException, InvalidParameterException, MissingParametersException, AccessDeniedException, CourseNotFoundException, AssignmentNotFoundException, UserNotAttendingTheCourseException {
-
         AppUser user = new AppUser("testOne", "testpass", "test", "one");
+        Course course = new Course("course", "tstcod");
 
-        Course course = new Course("course");
-        course.setId(1);
-
-        course.getAppUsers().add(new AppUserCourse(user, course, true));
-
-        Assignment assignment = new Assignment("test", "test", null);
-        assignment.setId(1);
-
-        course.getAssignments().add(assignment);
+        course.getAppUserCourses().add(new AppUserCourse(user, course, true));
 
         Mockito.when(appUserService.getUserByUsername(Mockito.anyString()))
                 .thenReturn(user);
 
-        Mockito.when(courseRepository.findById(Mockito.anyInt()))
+        Mockito.when(courseRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(course));
 
-        assignmentService.deleteAssignment("testOne", course.getId(), 1);
-        Mockito.verify(courseRepository).save(course);
-        assertEquals(0, course.getAssignments().size());
+        Assignment assignment = Mockito.spy(new Assignment("test", "test", null));
+        course.getAssignments().add(assignment);
 
+        Mockito.when(assignment.getId()).thenReturn(1L);
+
+        assignmentService.deleteAssignment("testOne", 1L, 1L);
+        assertEquals(0, course.getAssignments().size());
     }
 
 }

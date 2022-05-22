@@ -73,8 +73,9 @@ public class AssignmentService {
 
         Assignment assignment = getAssignmentById(assignmentId, course);
 
-        if(dto.getTitle() == null && dto.getContent() == null && dto.getLinks() == null)
+        if(dto.getTitle() == null && dto.getContent() == null && dto.getLinks() == null) {
             throw new MissingParametersException();
+        }
 
         Optional.ofNullable(dto.getTitle()).ifPresent(title -> assignment.setTitle(checkStringAndTrim(title, ParamType.title)));
 
@@ -110,7 +111,7 @@ public class AssignmentService {
     private Assignment getAssignmentById(long assignmentId, Course course){
         return course.getAssignments()
                 .stream()
-                .filter(assignment -> assignment.getId()==assignmentId)
+                .filter(assignment -> assignmentId == assignment.getId())
                 .findFirst()
                 .orElseThrow(() -> new AssignmentNotFoundException(assignmentId));
     }
