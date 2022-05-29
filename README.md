@@ -19,12 +19,12 @@ By default, the only admin of a course is its creator, but they can make any oth
 You can run the app on your own server with Docker Compose:
 
 - Download the `docker-compose.yml` file from this repo and save it in a new directory
-- Change the `JWT.SECRET` variable in the file to a random string, I also STRONGLY recommend changing the database credentials.
+- Change the `JWT.SECRET` variable in the file to a random string, I also <b>STRONGLY</b> recommend changing the database credentials.
 - Run the following command in the directory containing the file:<br>
 `docker-compose up`
 
 You can also run the app with a regular Docker image and providing your own database.
-Here's a command that you'll have to run in order to start the bot up on your machine:
+Here's a command that you'll have to run in order to start the app up on your machine:
 ```
 docker run \
 -e SPRING.DATASOURCE.URL=jdbc:postgresql://yourdatabaseurl \
