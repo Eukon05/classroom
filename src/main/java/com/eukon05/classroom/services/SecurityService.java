@@ -2,19 +2,19 @@ package com.eukon05.classroom.services;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.eukon05.classroom.domains.AppUser;
-import com.eukon05.classroom.enums.JWTFinals;
-import com.eukon05.classroom.exceptions.AccessDeniedException;
+import com.eukon05.classroom.enums.SecurityFinals;
 import com.eukon05.classroom.exceptions.InvalidTokenException;
 import com.eukon05.classroom.exceptions.MissingParametersException;
 import com.eukon05.classroom.exceptions.MissingRefreshTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.eukon05.classroom.enums.SecurityFinals.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,38 +27,32 @@ public class SecurityService {
         if(username == null || password == null)
             throw new MissingParametersException();
 
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, password);
-
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
-        if(!authentication.isAuthenticated())
-            throw new AccessDeniedException();
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", jwtService.createAccessToken(username, requestUrl));
-        tokens.put("refresh_token", jwtService.createRefreshToken(username, requestUrl));
+        tokens.put(ACCESS_TOKEN.value, jwtService.createAccessToken(username, requestUrl));
+        tokens.put(REFRESH_TOKEN.value, jwtService.createRefreshToken(username, requestUrl));
 
         return tokens;
     }
 
     public Map<String, String> refresh(String auth, String requestUrl){
-        if(auth==null || !auth.startsWith(JWTFinals.TOKEN_PREFIX.value))
+        if(auth==null || !auth.startsWith(TOKEN_PREFIX.value))
             throw new MissingRefreshTokenException();
 
         DecodedJWT jwt = jwtService.verifyAndReturnToken(auth);
 
-        if(!JWTFinals.REFRESH.value.equals(jwt.getClaim("type").asString()))
+        if(!SecurityFinals.REFRESH.value.equals(jwt.getClaim(SecurityFinals.TYPE.value).asString()))
             throw new InvalidTokenException();
 
         String username = jwt.getSubject();
 
-        //This line isn't required in the authenticate() method, since authenticationManager automatically checks if the user exists
+        //This line isn't required in the "authenticate()" method, since authenticationManager automatically checks if the user exists
         //Here, however, we need to check if the refresh token, even if valid, corresponds to a registered user
         AppUser user = appUserService.getUserByUsername(username);
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", jwtService.createAccessToken(user.getUsername(), requestUrl));
-        tokens.put("refresh_token", auth.replace(JWTFinals.TOKEN_PREFIX.value, ""));
+        tokens.put(ACCESS_TOKEN.value, jwtService.createAccessToken(user.getUsername(), requestUrl));
+        tokens.put(REFRESH_TOKEN.value, auth.replace(TOKEN_PREFIX.value, ""));
 
         return tokens;
     }

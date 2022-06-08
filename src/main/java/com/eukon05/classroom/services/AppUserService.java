@@ -20,10 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.eukon05.classroom.ParamUtils.*;
 
@@ -84,29 +82,22 @@ public class AppUserService implements UserDetailsService {
     @Transactional
     public void deleteUser(String username){
         AppUser user = getUserByUsername(username);
-        List<Course> courses = new ArrayList<>();
 
-        for(AppUserCourse appUserCourse : user.getAppUserCourses()){
-            courses.add(appUserCourse.getCourse());
-        }
-
-        for(Course course : courses) {
-            appUserCourseRepository.delete(removeCourse(user, course));
+        //why am I required to use "toList()" here? Without it, I get a "concurrent modification exception" and I have no idea why
+        user.getAppUserCourses().stream().map(AppUserCourse::getCourse).toList().forEach(course -> {
+            appUserCourseRepository.delete(removeCourse(user, course)); //and why do I have to use the repository? Shouldn't this object be deleted by a cascade?
 
             if (course.getAppUserCourses().isEmpty()) {
                 courseRepository.delete(course);
-            }
-            else {
+            } else {
                 reassignTeacher(course);
             }
-        }
-
+        });
         appUserRepository.delete(user);
     }
 
     public List<Course> getUserCourses(String username){
-        AppUser user = getUserByUsername(username);
-        return user.getAppUserCourses().stream().map(auc -> auc.getCourse()).collect(Collectors.toList());
+        return getUserByUsername(username).getAppUserCourses().stream().map(AppUserCourse::getCourse).toList();
     }
 
     @Transactional
@@ -151,7 +142,7 @@ public class AppUserService implements UserDetailsService {
     }
 
 
-    AppUserCourse removeCourse(AppUser user, Course course){
+    private AppUserCourse removeCourse(AppUser user, Course course){
         AppUserCourse appUserCourse = user.getAppUserCourses()
                 .stream()
                 .filter(auc -> auc.getCourse().equals(course))
@@ -164,10 +155,8 @@ public class AppUserService implements UserDetailsService {
     }
 
     private void reassignTeacher(Course course) {
-        course.getAppUserCourses().stream().filter(auc2 -> auc2.isTeacher())
+        course.getAppUserCourses().stream().filter(AppUserCourse::isTeacher)
                 .findFirst().ifPresentOrElse(user -> {}, () -> course.getAppUserCourses().get(0).setTeacher(true));
     }
-
-
 
 }

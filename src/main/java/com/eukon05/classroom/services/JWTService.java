@@ -4,11 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.eukon05.classroom.enums.JWTFinals;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+
+import static com.eukon05.classroom.enums.SecurityFinals.*;
 
 @Service
 public class JWTService {
@@ -24,7 +25,7 @@ public class JWTService {
     }
 
     public DecodedJWT verifyAndReturnToken(String authorization){
-        authorization = authorization.replace("Bearer ", "");
+        authorization = authorization.replace(TOKEN_PREFIX.value, "");
         JWTVerifier verifier = JWT.require(algorithm).build();
         return verifier.verify(authorization);
     }
@@ -33,7 +34,7 @@ public class JWTService {
         return JWT.create()
                 .withSubject(username)
                 .withIssuer(issuer)
-                .withClaim("type", JWTFinals.ACCESS.value)
+                .withClaim(TYPE.value, ACCESS.value)
                 .withExpiresAt(new Date(System.currentTimeMillis() + accessLifetime))
                 .sign(algorithm);
     }
@@ -42,7 +43,7 @@ public class JWTService {
         return JWT.create()
                 .withSubject(username)
                 .withIssuer(issuer)
-                .withClaim("type", JWTFinals.REFRESH.value)
+                .withClaim(TYPE.value, REFRESH.value)
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshLifetime))
                 .sign(algorithm);
     }

@@ -43,6 +43,12 @@ public class AssignmentService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
+        AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
+
+        if(!auc.isTeacher()) {
+            throw new AccessDeniedException();
+        }
+
         final StringBuilder contentBuilder = new StringBuilder();
         Optional.ofNullable(dto.getContent()).ifPresent(content -> {
             //This line bypasses the empty string check in checkStringAndTrim()
@@ -50,12 +56,6 @@ public class AssignmentService {
                 contentBuilder.append(checkStringAndTrim(content, ParamType.content));
             }
         });
-
-        AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher()) {
-            throw new AccessDeniedException();
-        }
 
         course.getAssignments().add(new Assignment(checkStringAndTrim(dto.getTitle(), ParamType.title), contentBuilder.toString(), dto.getLinks()));
     }
@@ -89,7 +89,7 @@ public class AssignmentService {
             }
         });
 
-        Optional.ofNullable(dto.getLinks()).ifPresent(links -> assignment.setLinks(links));
+        Optional.ofNullable(dto.getLinks()).ifPresent(assignment::setLinks);
     }
 
     @Transactional

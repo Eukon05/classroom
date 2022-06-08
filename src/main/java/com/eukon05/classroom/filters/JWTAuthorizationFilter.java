@@ -1,7 +1,7 @@
 package com.eukon05.classroom.filters;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.eukon05.classroom.enums.JWTFinals;
+import com.eukon05.classroom.enums.SecurityFinals;
 import com.eukon05.classroom.exceptions.InvalidTokenException;
 import com.eukon05.classroom.services.JWTService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.eukon05.classroom.enums.SecurityFinals.*;
+
 
 @Component
 @RequiredArgsConstructor
@@ -27,9 +29,9 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        String auth = httpServletRequest.getHeader("Authorization");
+        String auth = httpServletRequest.getHeader(AUTHORIZATION.value);
 
-        if(auth==null || !auth.startsWith(JWTFinals.TOKEN_PREFIX.value)) {
+        if(auth==null || !auth.startsWith(TOKEN_PREFIX.value)) {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
@@ -37,12 +39,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         try {
             DecodedJWT jwt = jwtService.verifyAndReturnToken(auth);
 
-            if(!JWTFinals.ACCESS.value.equals(jwt.getClaim("type").asString()))
+            if(!SecurityFinals.ACCESS.value.equals(jwt.getClaim(TYPE.value).asString()))
                 throw new InvalidTokenException();
 
-            String username = jwt.getSubject();
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, null, null);
-            SecurityContextHolder.getContext().setAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(jwt.getSubject(), null, null));
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         }
         catch(Exception ex){

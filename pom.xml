@@ -20,7 +20,7 @@
         <jwt.version>3.19.2</jwt.version>
         <junit.version>5.8.2</junit.version>
         <springdoc.version>1.6.8</springdoc.version>
-        <flyway.version>8.5.10</flyway.version>
+        <flyway.version>8.5.11</flyway.version>
 	</properties>
 
 	<dependencies>

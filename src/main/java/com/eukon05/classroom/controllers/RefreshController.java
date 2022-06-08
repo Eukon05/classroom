@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+import static com.eukon05.classroom.enums.SecurityFinals.AUTHORIZATION;
+
 @RestController
 @RequestMapping("api/v1/refresh")
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class RefreshController {
     @Operation(summary = "Returns a new auth token after providing a refresh token")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, String> refreshToken(HttpServletRequest request){
-        return securityService.refresh(request.getHeader("Authorization"), request.getRequestURL().toString());
+        return securityService.refresh(request.getHeader(AUTHORIZATION.value), request.getRequestURL().toString());
     }
 
 }

@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static com.eukon05.classroom.ParamUtils.checkObject;
 import static com.eukon05.classroom.ParamUtils.checkStringAndTrim;
@@ -32,8 +31,7 @@ public class CourseService {
 
     Course getCourseById(long id){
         checkObject(id, ParamType.courseId);
-        Optional<Course> courseOptional = courseRepository.findById(id);
-        return courseOptional.orElseThrow(() -> new CourseNotFoundException(id));
+        return courseRepository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
     }
 
     @Transactional
@@ -53,8 +51,8 @@ public class CourseService {
 
         Course course = new Course(courseName, random);
 
-        courseRepository.save(course);
         appUserService.addCourse(appUser,course,true);
+        courseRepository.save(course);
     }
 
     @Transactional
@@ -97,7 +95,7 @@ public class CourseService {
 
         return course.getAppUserCourses().stream()
                 .map(auc -> new CourseUserDTO(auc.getAppUser().getUsername(), auc.getAppUser().getName(), auc.getAppUser().getSurname(), auc.isTeacher()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

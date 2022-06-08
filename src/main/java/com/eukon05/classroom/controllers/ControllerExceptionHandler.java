@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,6 +21,13 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>("Invalid/missing body", HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected String internalServerErrorHandler(Exception ex){
+        ex.printStackTrace();
+        return ex.getMessage();
+    }
+
     @ExceptionHandler(value = {InvalidParameterException.class,
             MissingParametersException.class,
             UsernameTakenException.class,
@@ -32,7 +40,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {AccessDeniedException.class,
             UserNotAttendingTheCourseException.class,
-            InvalidTokenException.class})
+            InvalidTokenException.class,
+            AuthenticationException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     protected String accessDeniedHandler(Exception ex){
         return ex.getMessage();
