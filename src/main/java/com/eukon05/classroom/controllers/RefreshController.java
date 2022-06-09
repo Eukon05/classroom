@@ -27,7 +27,7 @@ public class RefreshController {
     @Operation(summary = "Returns a new auth token after providing a refresh token")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, String> refreshToken(HttpServletRequest request){
-        return securityService.refresh(request.getHeader(AUTHORIZATION.value), request.getRequestURL().toString());
+        return securityService.refresh(request.getHeader(AUTHORIZATION), request.getRequestURL().toString());
     }
 
 }

@@ -1,7 +1,6 @@
 package com.eukon05.classroom.services;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.eukon05.classroom.domains.AppUser;
 import com.eukon05.classroom.enums.SecurityFinals;
 import com.eukon05.classroom.exceptions.InvalidTokenException;
 import com.eukon05.classroom.exceptions.MissingParametersException;
@@ -30,29 +29,29 @@ public class SecurityService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         Map<String, String> tokens = new HashMap<>();
-        tokens.put(ACCESS_TOKEN.value, jwtService.createAccessToken(username, requestUrl));
-        tokens.put(REFRESH_TOKEN.value, jwtService.createRefreshToken(username, requestUrl));
+        tokens.put(ACCESS_TOKEN, jwtService.createAccessToken(username, requestUrl));
+        tokens.put(REFRESH_TOKEN, jwtService.createRefreshToken(username, requestUrl));
 
         return tokens;
     }
 
     public Map<String, String> refresh(String auth, String requestUrl){
-        if(auth==null || !auth.startsWith(TOKEN_PREFIX.value))
+        if(auth==null || !auth.startsWith(TOKEN_PREFIX))
             throw new MissingRefreshTokenException();
 
         DecodedJWT jwt = jwtService.verifyAndReturnToken(auth);
 
-        if(!SecurityFinals.REFRESH.value.equals(jwt.getClaim(SecurityFinals.TYPE.value).asString()))
+        if(!SecurityFinals.REFRESH.equals(jwt.getClaim(SecurityFinals.TYPE).asString()))
             throw new InvalidTokenException();
 
         String username = jwt.getSubject();
 
         //This line isn't required in the "authenticate()" method, since authenticationManager automatically checks if the user exists
         //Here, however, we need to check if the refresh token, even if valid, corresponds to a registered user
-        AppUser user = appUserService.getUserByUsername(username);
+        appUserService.getUserByUsername(username);
         Map<String, String> tokens = new HashMap<>();
-        tokens.put(ACCESS_TOKEN.value, jwtService.createAccessToken(user.getUsername(), requestUrl));
-        tokens.put(REFRESH_TOKEN.value, auth.replace(TOKEN_PREFIX.value, ""));
+        tokens.put(ACCESS_TOKEN, jwtService.createAccessToken(username, requestUrl));
+        tokens.put(REFRESH_TOKEN, auth.replace(TOKEN_PREFIX, ""));
 
         return tokens;
     }

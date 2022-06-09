@@ -1,19 +1,13 @@
 package com.eukon05.classroom.enums;
 
-public enum SecurityFinals {
+public final class SecurityFinals {
 
-    ACCESS("access"),
-    REFRESH("refresh"),
-    TOKEN_PREFIX("Bearer "),
-    AUTHORIZATION("Authorization"),
-    ACCESS_TOKEN("access_token"),
-    REFRESH_TOKEN("refresh_token"),
-    TYPE("type");
-
-    public final String value;
-
-    SecurityFinals(String value){
-        this.value = value;
-    }
+    public static final String ACCESS = "access";
+    public static final String REFRESH = "refresh";
+    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final  String AUTHORIZATION = "Authorization";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String TYPE = "type";
 
 }

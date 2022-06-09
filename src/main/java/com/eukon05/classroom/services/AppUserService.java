@@ -41,12 +41,10 @@ public class AppUserService implements UserDetailsService {
 
         checkCredential(appUserDTO.getPassword(), ParamType.password);
 
-        AppUser user = new AppUser(appUserDTO.getUsername(),
+        appUserRepository.save(new AppUser(appUserDTO.getUsername(),
                 passwordEncoder.encode(appUserDTO.getPassword()),
                 checkStringAndTrim(appUserDTO.getName(), ParamType.name),
-                checkStringAndTrim(appUserDTO.getSurname(), ParamType.surname));
-
-        appUserRepository.save(user);
+                checkStringAndTrim(appUserDTO.getSurname(), ParamType.surname)));
     }
 
     public AppUser getUserByUsername(String username){

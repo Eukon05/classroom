@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import static com.eukon05.classroom.ParamUtils.checkObject;
@@ -40,14 +39,11 @@ public class CourseService {
 
         courseName = checkStringAndTrim(courseName, ParamType.courseName);
 
-        Optional<Course> tmp;
-        String random;
+        String random = generateCourseKey();
 
-        do {
+        while(courseRepository.findCourseByInviteCode(random).isPresent()){
             random = generateCourseKey();
-            tmp = courseRepository.findCourseByInviteCode(random);
         }
-        while (tmp.isPresent());
 
         Course course = new Course(courseName, random);
 
@@ -60,11 +56,7 @@ public class CourseService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
-        AppUserCourse auc = getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher()) {
-            throw new AccessDeniedException();
-        }
+        teacherCheck(appUser, course);
 
         courseRepository.delete(course);
     }
@@ -74,11 +66,7 @@ public class CourseService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
-        AppUserCourse auc = getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher()) {
-            throw new AccessDeniedException();
-        }
+        teacherCheck(appUser, course);
 
         course.setName(checkStringAndTrim(newName, ParamType.courseName));
     }
@@ -88,7 +76,7 @@ public class CourseService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = getCourseById(courseId);
 
-        getAppUserCourse(appUser, course);
+        getAppUserCourse(appUser, course); //checks if the users is attending the course
 
         //We need to return the users in their DTO form,
         //because we have to include the isTeacher value
@@ -109,11 +97,7 @@ public class CourseService {
         AppUser appUser = appUserService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);
 
-        AppUserCourse auc = getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher()) {
-            throw new AccessDeniedException();
-        }
+        teacherCheck(appUser, course);
 
         AppUser tmpAppUser = appUserService.getUserByUsername(username);
 
@@ -124,16 +108,23 @@ public class CourseService {
         AppUser appUser = appUserService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);
 
-        AppUserCourse auc = getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher() && !principalUsername.equals(username)) {
+        if(!getAppUserCourse(appUser, course).isTeacher() && !principalUsername.equals(username)) {
             throw new AccessDeniedException();
         }
 
         appUserService.leaveCourse(username, courseId);
     }
 
-    AppUserCourse getAppUserCourse(AppUser appUser, Course course){
+    void teacherCheck(AppUser user, Course course){
+        if(!getAppUserCourse(user, course).isTeacher()) {
+            throw new AccessDeniedException();
+        }
+    }
+
+    void attendanceCheck(AppUser user, Course course){
+        getAppUserCourse(user, course);
+    }
+    private AppUserCourse getAppUserCourse(AppUser appUser, Course course){
         return course.getAppUserCourses()
                 .stream()
                 .filter(auc -> auc.getAppUser().equals(appUser))

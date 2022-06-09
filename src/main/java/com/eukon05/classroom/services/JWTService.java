@@ -25,7 +25,7 @@ public class JWTService {
     }
 
     public DecodedJWT verifyAndReturnToken(String authorization){
-        authorization = authorization.replace(TOKEN_PREFIX.value, "");
+        authorization = authorization.replace(TOKEN_PREFIX, "");
         JWTVerifier verifier = JWT.require(algorithm).build();
         return verifier.verify(authorization);
     }
@@ -34,7 +34,7 @@ public class JWTService {
         return JWT.create()
                 .withSubject(username)
                 .withIssuer(issuer)
-                .withClaim(TYPE.value, ACCESS.value)
+                .withClaim(TYPE, ACCESS)
                 .withExpiresAt(new Date(System.currentTimeMillis() + accessLifetime))
                 .sign(algorithm);
     }
@@ -43,7 +43,7 @@ public class JWTService {
         return JWT.create()
                 .withSubject(username)
                 .withIssuer(issuer)
-                .withClaim(TYPE.value, REFRESH.value)
+                .withClaim(TYPE, REFRESH)
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshLifetime))
                 .sign(algorithm);
     }

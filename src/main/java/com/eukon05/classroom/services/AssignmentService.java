@@ -1,12 +1,10 @@
 package com.eukon05.classroom.services;
 
 import com.eukon05.classroom.domains.AppUser;
-import com.eukon05.classroom.domains.AppUserCourse;
 import com.eukon05.classroom.domains.Assignment;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.AssignmentDataDTO;
 import com.eukon05.classroom.enums.ParamType;
-import com.eukon05.classroom.exceptions.AccessDeniedException;
 import com.eukon05.classroom.exceptions.AssignmentNotFoundException;
 import com.eukon05.classroom.exceptions.MissingParametersException;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +29,7 @@ public class AssignmentService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        //This line serves as a check for if the users is attending the course.
-        //It will be used multiple times in this class, so I wanted to clarify what it is for.
-        courseService.getAppUserCourse(appUser, course);
+        courseService.attendanceCheck(appUser, course);
 
         return course.getAssignments();
     }
@@ -43,11 +39,7 @@ public class AssignmentService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher()) {
-            throw new AccessDeniedException();
-        }
+        courseService.teacherCheck(appUser, course);
 
         final StringBuilder contentBuilder = new StringBuilder();
         Optional.ofNullable(dto.getContent()).ifPresent(content -> {
@@ -65,11 +57,7 @@ public class AssignmentService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
-        AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher()) {
-            throw new AccessDeniedException();
-        }
+        courseService.teacherCheck(appUser, course);
 
         Assignment assignment = getAssignmentById(assignmentId, course);
 
@@ -97,13 +85,9 @@ public class AssignmentService {
         AppUser appUser = appUserService.getUserByUsername(username);
         Course course = courseService.getCourseById(courseId);
 
+        courseService.teacherCheck(appUser, course);
+
         checkObject(assignmentId, ParamType.assignmentId);
-
-        AppUserCourse auc = courseService.getAppUserCourse(appUser, course);
-
-        if(!auc.isTeacher()) {
-            throw new AccessDeniedException();
-        }
 
         course.getAssignments().remove(getAssignmentById(assignmentId, course));
     }
