@@ -14,8 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.eukon05.classroom.ParamUtils.checkObject;
-import static com.eukon05.classroom.ParamUtils.checkStringAndTrim;
+import static com.eukon05.classroom.statics.ParamUtils.checkObject;
+import static com.eukon05.classroom.statics.ParamUtils.checkStringAndTrim;
 
 @Service
 @RequiredArgsConstructor

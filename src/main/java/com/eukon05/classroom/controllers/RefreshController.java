@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-import static com.eukon05.classroom.enums.SecurityFinals.AUTHORIZATION;
+import static com.eukon05.classroom.statics.SecurityFinals.AUTHORIZATION;
 
 @RestController
 @RequestMapping("api/v1/refresh")

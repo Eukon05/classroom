@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
-import static com.eukon05.classroom.enums.SecurityFinals.*;
+import static com.eukon05.classroom.statics.SecurityFinals.*;
 
 @Service
 public class JWTService {

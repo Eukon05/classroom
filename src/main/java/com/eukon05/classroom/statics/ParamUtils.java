@@ -1,4 +1,4 @@
-package com.eukon05.classroom;
+package com.eukon05.classroom.statics;
 
 import com.eukon05.classroom.builders.InvalidParameterExceptionBuilder;
 import com.eukon05.classroom.enums.ParamType;

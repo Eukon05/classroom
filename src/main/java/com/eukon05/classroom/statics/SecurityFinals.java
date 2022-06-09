@@ -1,6 +1,6 @@
-package com.eukon05.classroom.enums;
+package com.eukon05.classroom.statics;
 
-public final class SecurityFinals {
+public class SecurityFinals {
 
     public static final String ACCESS = "access";
     public static final String REFRESH = "refresh";

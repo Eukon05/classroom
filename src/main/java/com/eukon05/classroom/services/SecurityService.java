@@ -1,10 +1,10 @@
 package com.eukon05.classroom.services;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.eukon05.classroom.enums.SecurityFinals;
 import com.eukon05.classroom.exceptions.InvalidTokenException;
 import com.eukon05.classroom.exceptions.MissingParametersException;
 import com.eukon05.classroom.exceptions.MissingRefreshTokenException;
+import com.eukon05.classroom.statics.SecurityFinals;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.eukon05.classroom.enums.SecurityFinals.*;
+import static com.eukon05.classroom.statics.SecurityFinals.*;
 
 @Service
 @RequiredArgsConstructor

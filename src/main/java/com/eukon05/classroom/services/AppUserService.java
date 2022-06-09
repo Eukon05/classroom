@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.eukon05.classroom.ParamUtils.*;
+import static com.eukon05.classroom.statics.ParamUtils.*;
 
 @Service
 @RequiredArgsConstructor
