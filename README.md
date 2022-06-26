@@ -2,14 +2,23 @@
 A simple assignment management API, inspired by Google Classroom
 
 <h2>Disclaimer</h2>
-This project is meant to represent my current skills at creating RESTful APIs using Spring Boot. <br>
+<s>This project is meant to represent my current skills at creating RESTful APIs using Spring Boot. <br>
 It is still in development, so there is probably a lot of bugs and some features may not work as intended.<br>
-I'll try to bring this application to the best possible state before eventually moving on to another project.
+I'll try to bring this application to the best possible state before eventually moving on to another
+project.</s><br><br>
+UPDATE:<br>
+I've decided to cancel this project, because I'm now working on a group project very similar to this one.<br>
+It will follow more good practices and generally will be more polished and bug free, while also offering a lot more
+features.<br>
+Working on "Classroom" was a fantastic experience, and I've learned a lot during it's run.  
+This repository will be kept as an archive, to serve as a comparison to what I'll make next.
 
 <h2>Features</h2>
-This application allows its users to create and join "courses" - groups, in which the admin can share content for the other users to see.
+This application allows its users to create and join "courses" - groups, in which the admin can share content for the
+other users to see and react to.
 
-Every user can create their own course, and invite to join as many users as they like, by sending them a 6 character invite code, which is unique to every course.
+Every user can create their own course, and invite to join as many users as they like, by sending them a 6 character
+invite code, which is unique to every course.
 
 By default, the only admin of a course is its creator, but they can make any other attending user an admin as well.
 
