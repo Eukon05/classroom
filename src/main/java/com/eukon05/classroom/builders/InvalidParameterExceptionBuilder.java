@@ -9,11 +9,11 @@ public class InvalidParameterExceptionBuilder {
 
     public InvalidParameterExceptionBuilder(ExceptionType exceptionType, ParamType paramType){
         exception = switch(exceptionType){
-            case empty -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot be an empty string");
-            case tooLong -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot be longer than " + paramType.length + " characters");
-            case spaces -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot contain any spaces");
-            case tooShort -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot be shorter than " + paramType.length + " characters");
-            case selfRoleChange -> new InvalidParameterException("Invalid parameter: you cannot change your own role in the course");
+            case EMPTY -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot be an empty string");
+            case TOO_LONG -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot be longer than " + paramType.length + " characters");
+            case SPACES -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot contain any spaces");
+            case TOO_SHORT -> new InvalidParameterException("Invalid parameter: " + paramType.name() + " cannot be shorter than " + paramType.length + " characters");
+            case SELF_ROLE_CHANGE -> new InvalidParameterException("Invalid parameter: you cannot change your own role in the course");
         };
     }
 

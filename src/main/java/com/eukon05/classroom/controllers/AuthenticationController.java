@@ -21,7 +21,7 @@ public class AuthenticationController {
     @Operation(summary = "Allows the user to retrieve an auth token to use for all other operations")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, String> authenticate(@RequestBody CredentialsDTO dto, HttpServletRequest request){
-        return securityService.authenticate(dto.getUsername(), dto.getPassword(), request.getRequestURL().toString());
+        return securityService.authenticate(dto.username(), dto.password(), request.getRequestURL().toString());
     }
 
 

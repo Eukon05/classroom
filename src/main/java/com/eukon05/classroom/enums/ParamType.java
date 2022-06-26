@@ -2,20 +2,21 @@ package com.eukon05.classroom.enums;
 
 public enum ParamType {
 
-    username(100),
-    name(100),
-    surname(200),
-    password(100),
-    courseName(100),
-    title(200),
-    content(1000),
-    inviteCode(6),
-    courseId(null),
-    assignmentId(null),
-    isTeacher(null);
+    USERNAME(100),
+    NAME(100),
+    SURNAME(200),
+    PASSWORD(100),
+    COURSE_NAME(100),
+    TITLE(200),
+    CONTENT(1000),
+    INVITE_CODE(6),
+    COURSE_ID(null),
+    ASSIGNMENT_ID(null),
+    IS_TEACHER(null);
 
     public final Integer length;
-    ParamType(Integer length){
+
+    ParamType(Integer length) {
         this.length = length;
     }
 

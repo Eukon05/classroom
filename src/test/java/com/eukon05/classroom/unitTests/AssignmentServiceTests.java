@@ -12,25 +12,27 @@ import com.eukon05.classroom.services.AssignmentService;
 import com.eukon05.classroom.services.CourseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 public class AssignmentServiceTests {
-
-    private AssignmentService assignmentService;
+    @Mock
     private CourseRepository courseRepository;
+    @Mock
     private AppUserService appUserService;
-
+    private AssignmentService assignmentService;
 
     @BeforeEach
-    void initService(){
-        courseRepository = Mockito.mock(CourseRepository.class);
-        appUserService = Mockito.mock(AppUserService.class);
-        assignmentService = new AssignmentService(appUserService, Mockito.spy(new CourseService(courseRepository, appUserService)));
+    void init(){
+        assignmentService = new AssignmentService(appUserService, new CourseService(courseRepository, appUserService));
     }
 
     @Test
@@ -47,7 +49,7 @@ public class AssignmentServiceTests {
                 .thenReturn(Optional.of(course));
 
         AssignmentDataDTO dto = new AssignmentDataDTO("test assignment", "test content", new HashSet<>());
-        dto.getLinks().add("https://github.com/Eukon05");
+        dto.links().add("https://github.com/Eukon05");
 
         assignmentService.createAssignment("testOne", 1L, dto);
         assertEquals(1, course.getAssignments().size());
@@ -77,7 +79,7 @@ public class AssignmentServiceTests {
 
         assertEquals("test assignment", assignment.getTitle());
         assertEquals("test content", assignment.getContent());
-        assertEquals(dto.getLinks(), assignment.getLinks());
+        assertEquals(dto.links(), assignment.getLinks());
     }
 
     @Test

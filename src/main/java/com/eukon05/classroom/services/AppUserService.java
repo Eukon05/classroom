@@ -6,6 +6,7 @@ import com.eukon05.classroom.domains.AppUserCourse;
 import com.eukon05.classroom.domains.Course;
 import com.eukon05.classroom.dtos.AppUserDTO;
 import com.eukon05.classroom.dtos.AppUserUpdateDTO;
+import com.eukon05.classroom.dtos.CourseDTO;
 import com.eukon05.classroom.enums.ExceptionType;
 import com.eukon05.classroom.enums.ParamType;
 import com.eukon05.classroom.exceptions.*;
@@ -34,51 +35,57 @@ public class AppUserService implements UserDetailsService {
     private final AppUserCourseRepository appUserCourseRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void createUser(AppUserDTO appUserDTO){
-        checkCredential(appUserDTO.getUsername(), ParamType.username);
+    public void createUser(AppUserDTO appUserDTO) {
+        checkCredential(appUserDTO.username(), ParamType.USERNAME);
 
-        appUserRepository.findById(appUserDTO.getUsername()).ifPresent(user -> {throw new UsernameTakenException(user.getUsername());});
+        appUserRepository.findById(appUserDTO.username()).ifPresent(user -> {
+            throw new UsernameTakenException(user.getUsername());
+        });
 
-        checkCredential(appUserDTO.getPassword(), ParamType.password);
+        checkCredential(appUserDTO.password(), ParamType.PASSWORD);
 
-        appUserRepository.save(new AppUser(appUserDTO.getUsername(),
-                passwordEncoder.encode(appUserDTO.getPassword()),
-                checkStringAndTrim(appUserDTO.getName(), ParamType.name),
-                checkStringAndTrim(appUserDTO.getSurname(), ParamType.surname)));
+        appUserRepository.save(new AppUser(appUserDTO.username(),
+                passwordEncoder.encode(appUserDTO.password()),
+                checkStringAndTrim(appUserDTO.name(), ParamType.NAME),
+                checkStringAndTrim(appUserDTO.surname(), ParamType.SURNAME)));
     }
 
-    public AppUser getUserByUsername(String username){
-        checkCredential(username, ParamType.username);
+    public AppUser getUserByUsername(String username) {
+        checkCredential(username, ParamType.USERNAME);
         return appUserRepository.findById(username).orElseThrow(() -> new UserNotFoundException(username));
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username){
-        try {return getUserByUsername(username);}
+    public UserDetails loadUserByUsername(String username) {
+        try {
+            return getUserByUsername(username);
+        }
         //This is necessary to override the loadUserByUsername method properly, I should think of a cleaner fix though
-        catch (UserNotFoundException | InvalidParameterException | MissingParametersException e){throw new UsernameNotFoundException(e.getMessage());}
+        catch (UserNotFoundException | InvalidParameterException | MissingParametersException e) {
+            throw new UsernameNotFoundException(e.getMessage());
+        }
     }
 
     @Transactional
-    public void updateUser(String username, AppUserUpdateDTO dto){
+    public void updateUser(String username, AppUserUpdateDTO dto) {
         AppUser user = getUserByUsername(username);
 
-        if(dto.getName() == null && dto.getSurname() == null && dto.getPassword() == null) {
+        if (dto.name() == null && dto.surname() == null && dto.password() == null) {
             throw new MissingParametersException();
         }
 
-        Optional.ofNullable(dto.getPassword()).ifPresent(password -> {
-            checkCredential(password, ParamType.password);
+        Optional.ofNullable(dto.password()).ifPresent(password -> {
+            checkCredential(password, ParamType.PASSWORD);
             user.setPassword(passwordEncoder.encode(password));
         });
 
-        Optional.ofNullable(dto.getName()).ifPresent(name -> user.setName(checkStringAndTrim(name, ParamType.name)));
+        Optional.ofNullable(dto.name()).ifPresent(name -> user.setName(checkStringAndTrim(name, ParamType.NAME)));
 
-        Optional.ofNullable(dto.getSurname()).ifPresent(surname -> user.setName(checkStringAndTrim(surname, ParamType.name)));
+        Optional.ofNullable(dto.surname()).ifPresent(surname -> user.setSurname(checkStringAndTrim(surname, ParamType.SURNAME)));
     }
 
     @Transactional
-    public void deleteUser(String username){
+    public void deleteUser(String username) {
         AppUser user = getUserByUsername(username);
 
         //why am I required to use "toList()" here? Without it, I get a "concurrent modification exception" and I have no idea why
@@ -94,17 +101,22 @@ public class AppUserService implements UserDetailsService {
         appUserRepository.delete(user);
     }
 
-    public List<Course> getUserCourses(String username){
-        return getUserByUsername(username).getAppUserCourses().stream().map(AppUserCourse::getCourse).toList();
+    public List<CourseDTO> getUserCourses(String username) {
+        return getUserByUsername(username)
+                .getAppUserCourses()
+                .stream()
+                .map(AppUserCourse::getCourse)
+                .map(course -> new CourseDTO(course.getId(), course.getName(), course.getInviteCode()))
+                .toList();
     }
 
     @Transactional
-    public void joinCourse(String username, String inviteCode){
+    public void joinCourse(String username, String inviteCode) {
         AppUser user = getUserByUsername(username);
-        String trimmed = checkStringAndTrim(inviteCode, ParamType.inviteCode);
+        String trimmed = checkStringAndTrim(inviteCode, ParamType.INVITE_CODE);
 
-        if(trimmed.length()<6) {
-            throw new InvalidParameterExceptionBuilder(ExceptionType.tooShort, ParamType.inviteCode).build();
+        if (trimmed.length() < 6) {
+            throw new InvalidParameterExceptionBuilder(ExceptionType.TOO_SHORT, ParamType.INVITE_CODE).build();
         }
 
         Course course = courseRepository.findCourseByInviteCode(trimmed).orElseThrow(() -> new CourseNotFoundException(trimmed));
@@ -112,15 +124,15 @@ public class AppUserService implements UserDetailsService {
     }
 
     @Transactional
-    public void leaveCourse(String username, long courseId){
+    public void leaveCourse(String username, long courseId) {
         AppUser user = getUserByUsername(username);
 
-        checkObject(courseId, ParamType.courseId);
+        checkObject(courseId, ParamType.COURSE_ID);
 
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException(courseId));
         appUserCourseRepository.delete(removeCourse(user, course));
 
-        if(course.getAppUserCourses().isEmpty()) {
+        if (course.getAppUserCourses().isEmpty()) {
             courseRepository.delete(course);
             return;
         }
@@ -128,10 +140,10 @@ public class AppUserService implements UserDetailsService {
         reassignTeacher(course);
     }
 
-    void addCourse(AppUser user, Course course, boolean isTeacher){
+    void addCourse(AppUser user, Course course, boolean isTeacher) {
         AppUserCourse appUserCourse = new AppUserCourse(user, course, isTeacher);
 
-        if(user.getAppUserCourses().contains(appUserCourse)){
+        if (user.getAppUserCourses().contains(appUserCourse)) {
             throw new UserAlreadyAttendingTheCourseException(user.getUsername(), course.getId());
         }
 
@@ -140,7 +152,7 @@ public class AppUserService implements UserDetailsService {
     }
 
 
-    private AppUserCourse removeCourse(AppUser user, Course course){
+    private AppUserCourse removeCourse(AppUser user, Course course) {
         AppUserCourse appUserCourse = user.getAppUserCourses()
                 .stream()
                 .filter(auc -> auc.getCourse().equals(course))
@@ -154,7 +166,8 @@ public class AppUserService implements UserDetailsService {
 
     private void reassignTeacher(Course course) {
         course.getAppUserCourses().stream().filter(AppUserCourse::isTeacher)
-                .findFirst().ifPresentOrElse(user -> {}, () -> course.getAppUserCourses().get(0).setTeacher(true));
+                .findFirst().ifPresentOrElse(user -> {
+                }, () -> course.getAppUserCourses().get(0).setTeacher(true));
     }
 
 }

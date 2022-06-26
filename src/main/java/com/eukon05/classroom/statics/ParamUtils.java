@@ -9,16 +9,18 @@ import java.util.Optional;
 
 import static com.eukon05.classroom.enums.ExceptionType.*;
 
-public class ParamUtils {
+public final class ParamUtils {
+
+    private ParamUtils() {
+    }
 
     public static String checkStringAndTrim(String value, ParamType paramType) throws MissingParametersException, InvalidParameterException {
         String trimmed = Optional.ofNullable(value).orElseThrow(() -> new MissingParametersException(paramType)).trim();
 
-        if(trimmed.isEmpty())
-            throw new InvalidParameterExceptionBuilder(empty, paramType).build();
+        if (trimmed.isEmpty()) throw new InvalidParameterExceptionBuilder(EMPTY, paramType).build();
 
-        else if(trimmed.length() > paramType.length)
-            throw new InvalidParameterExceptionBuilder(tooLong, paramType).build();
+        else if (trimmed.length() > paramType.length)
+            throw new InvalidParameterExceptionBuilder(TOO_LONG, paramType).build();
 
         return trimmed;
     }
@@ -30,7 +32,7 @@ public class ParamUtils {
     public static void checkCredential(String credential, ParamType paramType) throws MissingParametersException, InvalidParameterException {
         //I know we are checking if credential == null two times, but credentials can't contain ANY spaces, so the checkStringAndTrim method must be called last
         if (Optional.ofNullable(credential).orElseThrow(() -> new MissingParametersException(paramType)).contains(" "))
-            throw new InvalidParameterExceptionBuilder(spaces, paramType).build();
+            throw new InvalidParameterExceptionBuilder(SPACES, paramType).build();
 
         checkStringAndTrim(credential, paramType);
     }

@@ -29,7 +29,7 @@ public class CourseService {
     private final AppUserService appUserService;
 
     Course getCourseById(long id){
-        checkObject(id, ParamType.courseId);
+        checkObject(id, ParamType.COURSE_ID);
         return courseRepository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
     }
 
@@ -37,7 +37,7 @@ public class CourseService {
     public void createCourse(String username, String courseName){
         AppUser appUser = appUserService.getUserByUsername(username);
 
-        courseName = checkStringAndTrim(courseName, ParamType.courseName);
+        courseName = checkStringAndTrim(courseName, ParamType.COURSE_NAME);
 
         String random = generateCourseKey();
 
@@ -68,7 +68,7 @@ public class CourseService {
 
         teacherCheck(appUser, course);
 
-        course.setName(checkStringAndTrim(newName, ParamType.courseName));
+        course.setName(checkStringAndTrim(newName, ParamType.COURSE_NAME));
     }
 
 
@@ -89,10 +89,10 @@ public class CourseService {
     @Transactional
     public void updateUserRoleInCourse(String principalUsername, long courseId, String username, boolean isTeacher){
         if(principalUsername.equals(username)) {
-            throw new InvalidParameterExceptionBuilder(ExceptionType.selfRoleChange, ParamType.username).build();
+            throw new InvalidParameterExceptionBuilder(ExceptionType.SELF_ROLE_CHANGE, ParamType.USERNAME).build();
         }
 
-        checkObject(isTeacher, ParamType.isTeacher);
+        checkObject(isTeacher, ParamType.IS_TEACHER);
 
         AppUser appUser = appUserService.getUserByUsername(principalUsername);
         Course course = getCourseById(courseId);
@@ -131,7 +131,6 @@ public class CourseService {
                 .findFirst()
                 .orElseThrow(() -> new UserNotAttendingTheCourseException(appUser.getUsername(), course.getId()));
     }
-
 
     private String generateCourseKey(){
         StringBuilder result = new StringBuilder();

@@ -3,7 +3,6 @@ package com.eukon05.classroom.domains;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -11,9 +10,9 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonIgnoreProperties(value= {"appUserCourses", "assignments"})
+@JsonIgnoreProperties(value = {"appUserCourses", "assignments"})
 @Getter
-@NoArgsConstructor
+
 @Entity
 @Table(name = "COURSE")
 @EqualsAndHashCode
@@ -33,9 +32,12 @@ public class Course {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Assignment> assignments = new ArrayList<>();
 
-    public Course(String name, String inviteCode){
+    public Course(String name, String inviteCode) {
         this.name = name;
         this.inviteCode = inviteCode;
     }
 
+    public Course() {
+
+    }
 }

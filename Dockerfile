@@ -1,12 +1,4 @@
 # syntax=docker/dockerfile:1
-
-FROM maven:3.8.5-openjdk-17
-
-WORKDIR /app
-
-COPY pom.xml ./
-RUN mvn dependency:go-offline
-
-COPY src ./src
-
-CMD ["mvn", "spring-boot:run"]
+FROM openjdk:17-jdk-alpine
+COPY target/classroom.jar classroom.jar
+ENTRYPOINT ["java","-jar","/classroom.jar"]

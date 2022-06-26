@@ -32,7 +32,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
             MissingParametersException.class,
             UsernameTakenException.class,
             MissingRefreshTokenException.class,
-            UserAlreadyAttendingTheCourseException.class})
+            UserAlreadyAttendingTheCourseException.class,
+            AnswerAlreadyGivenException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected String badRequestHandler(Exception ex){
         return ex.getMessage();
@@ -41,15 +42,17 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {AccessDeniedException.class,
             UserNotAttendingTheCourseException.class,
             InvalidTokenException.class,
-            AuthenticationException.class})
+            AuthenticationException.class,
+            TeacherCantAnswerAssignmentsException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     protected String accessDeniedHandler(Exception ex){
         return ex.getMessage();
     }
 
     @ExceptionHandler(value = {UserNotFoundException.class,
-    CourseNotFoundException.class,
-    AssignmentNotFoundException.class})
+            CourseNotFoundException.class,
+            AssignmentNotFoundException.class,
+            AnswerNotGivenException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     protected String resourceNotFoundHandler(Exception ex){
         return ex.getMessage();

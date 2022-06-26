@@ -12,7 +12,10 @@ import com.eukon05.classroom.services.AppUserService;
 import com.eukon05.classroom.services.CourseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
@@ -20,22 +23,19 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 public class CourseServiceTests {
-
-    private CourseService courseService;
+    @Mock
     private CourseRepository courseRepository;
-    private AppUserService appUserService;
+    @Mock
     private AppUserRepository appUserRepository;
+    private AppUserService appUserService;
+    private CourseService courseService;
 
     @BeforeEach
-    void initService(){
-
-        courseRepository = Mockito.mock(CourseRepository.class);
-        AppUserCourseRepository aucRepository = Mockito.mock(AppUserCourseRepository.class);
-        appUserRepository = Mockito.mock(AppUserRepository.class);
-        appUserService = Mockito.spy(new AppUserService(appUserRepository, courseRepository, aucRepository, new BCryptPasswordEncoder()));
+    void init(){
+        appUserService = Mockito.spy(new AppUserService(appUserRepository, courseRepository, Mockito.mock(AppUserCourseRepository.class), new BCryptPasswordEncoder()));
         courseService = new CourseService(courseRepository, appUserService);
-
     }
 
     @Test
@@ -85,10 +85,10 @@ public class CourseServiceTests {
         Mockito.when(courseRepository.findById(1L)).thenReturn(Optional.of(course));
 
         List<CourseUserDTO> list = courseService.getCourseUsers("testOne", 1);
-        assertEquals("testOne", list.get(0).getUsername());
-        assertEquals("testTwo", list.get(1).getUsername());
-        assertTrue(list.get(0).getIsTeacher());
-        assertFalse(list.get(1).getIsTeacher());
+        assertEquals("testOne", list.get(0).username());
+        assertEquals("testTwo", list.get(1).username());
+        assertTrue(list.get(0).isTeacher());
+        assertFalse(list.get(1).isTeacher());
     }
 
     @Test

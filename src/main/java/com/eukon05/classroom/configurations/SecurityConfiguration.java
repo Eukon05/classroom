@@ -1,6 +1,7 @@
 package com.eukon05.classroom.configurations;
 
 import com.eukon05.classroom.filters.JWTAuthorizationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,13 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration{
+@RequiredArgsConstructor
+public class SecurityConfiguration {
 
     private final JWTAuthorizationFilter jwtAuthorizationFilter;
-
-    public SecurityConfiguration(JWTAuthorizationFilter jwtAuthorizationFilter) {
-        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,8 +31,8 @@ public class SecurityConfiguration{
                 .antMatchers(HttpMethod.POST, "/api/v1/refresh").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/api-docs/**").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/v1/swagger-ui.html").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/v1/swagger-ui/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/swagger-ui.html").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .logout().invalidateHttpSession(true).clearAuthentication(true).permitAll()

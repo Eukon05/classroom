@@ -13,30 +13,28 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "ASSIGNMENT")
+@Table(name = "ANSWER")
 @EqualsAndHashCode
-public class Assignment {
+public class Answer {
+
+    public Answer(AppUser author,String content, Set<String> links){
+        this.author=author;
+        this.content=content;
+        this.links=links;
+    }
 
     @Id
     @GenericGenerator(name = "inc", strategy = "increment")
     @GeneratedValue(generator = "inc")
     private Long id;
-    @Setter
-    private String title;
+
+    @ManyToOne
+    private AppUser author;
+
     @Setter
     private String content;
 
     @ElementCollection
     @Setter
     private Set<String> links = new HashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final Set<Answer> answers = new HashSet<>();
-
-    public Assignment(String title, String content, Set<String> links){
-        this.title=title;
-        this.content=content;
-        this.links=links;
-    }
-
 }

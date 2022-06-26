@@ -42,14 +42,14 @@ public class AssignmentService {
         courseService.teacherCheck(appUser, course);
 
         final StringBuilder contentBuilder = new StringBuilder();
-        Optional.ofNullable(dto.getContent()).ifPresent(content -> {
+        Optional.ofNullable(dto.content()).ifPresent(content -> {
             //This line bypasses the empty string check in checkStringAndTrim()
             if(!content.trim().isEmpty()) {
-                contentBuilder.append(checkStringAndTrim(content, ParamType.content));
+                contentBuilder.append(checkStringAndTrim(content, ParamType.CONTENT));
             }
         });
 
-        course.getAssignments().add(new Assignment(checkStringAndTrim(dto.getTitle(), ParamType.title), contentBuilder.toString(), dto.getLinks()));
+        course.getAssignments().add(new Assignment(checkStringAndTrim(dto.title(), ParamType.TITLE), contentBuilder.toString(), dto.links()));
     }
 
     @Transactional
@@ -61,23 +61,23 @@ public class AssignmentService {
 
         Assignment assignment = getAssignmentById(assignmentId, course);
 
-        if(dto.getTitle() == null && dto.getContent() == null && dto.getLinks() == null) {
+        if(dto.title() == null && dto.content() == null && dto.links() == null) {
             throw new MissingParametersException();
         }
 
-        Optional.ofNullable(dto.getTitle()).ifPresent(title -> assignment.setTitle(checkStringAndTrim(title, ParamType.title)));
+        Optional.ofNullable(dto.title()).ifPresent(title -> assignment.setTitle(checkStringAndTrim(title, ParamType.TITLE)));
 
-        Optional.ofNullable(dto.getContent()).ifPresent(content -> {
+        Optional.ofNullable(dto.content()).ifPresent(content -> {
             //This line bypasses the empty string check in checkStringAndTrim()
             if(content.trim().isEmpty()) {
                 assignment.setContent("");
             }
             else {
-                assignment.setContent(checkStringAndTrim(content, ParamType.content));
+                assignment.setContent(checkStringAndTrim(content, ParamType.CONTENT));
             }
         });
 
-        Optional.ofNullable(dto.getLinks()).ifPresent(assignment::setLinks);
+        Optional.ofNullable(dto.links()).ifPresent(assignment::setLinks);
     }
 
     @Transactional
@@ -87,12 +87,12 @@ public class AssignmentService {
 
         courseService.teacherCheck(appUser, course);
 
-        checkObject(assignmentId, ParamType.assignmentId);
+        checkObject(assignmentId, ParamType.ASSIGNMENT_ID);
 
         course.getAssignments().remove(getAssignmentById(assignmentId, course));
     }
 
-    private Assignment getAssignmentById(long assignmentId, Course course){
+    Assignment getAssignmentById(long assignmentId, Course course){
         return course.getAssignments()
                 .stream()
                 .filter(assignment -> assignmentId == assignment.getId())

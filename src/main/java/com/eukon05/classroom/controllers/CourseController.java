@@ -25,8 +25,8 @@ public class CourseController {
     @SecurityRequirement(name = "JWT")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new course")
-    public String createCourse(Principal principal, @RequestBody CourseDataDTO dto){
-        courseService.createCourse(principal.getName(), dto.getCourseName());
+    public String createCourse(Principal principal, @RequestBody CourseDataDTO dto) {
+        courseService.createCourse(principal.getName(), dto.courseName());
         return "SUCCESS";
     }
 
@@ -34,8 +34,8 @@ public class CourseController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Updates the course with provided details")
     @ResponseStatus(HttpStatus.OK)
-    public String updateCourse(Principal principal, @PathVariable long courseId, @RequestBody CourseDataDTO dto){
-        courseService.updateCourse(principal.getName(), courseId, dto.getCourseName());
+    public String updateCourse(Principal principal, @PathVariable long courseId, @RequestBody CourseDataDTO dto) {
+        courseService.updateCourse(principal.getName(), courseId, dto.courseName());
         return "SUCCESS";
     }
 
@@ -43,7 +43,7 @@ public class CourseController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Deletes the course")
     @ResponseStatus(HttpStatus.OK)
-    public String deleteCourse(Principal principal, @PathVariable long courseId){
+    public String deleteCourse(Principal principal, @PathVariable long courseId) {
         courseService.deleteCourse(principal.getName(), courseId);
         return "SUCCESS";
     }
@@ -53,8 +53,8 @@ public class CourseController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Changes a specified user's role from a student to a teacher or vice versa")
     @ResponseStatus(HttpStatus.OK)
-    public String updateUserRole(Principal principal, @PathVariable long courseId, @RequestBody CourseUserUpdateDTO dto){
-        courseService.updateUserRoleInCourse(principal.getName(), courseId, dto.getUsername(), dto.getIsTeacher());
+    public String updateUserRole(Principal principal, @PathVariable long courseId, @RequestBody CourseUserUpdateDTO dto) {
+        courseService.updateUserRoleInCourse(principal.getName(), courseId, dto.username(), dto.isTeacher());
         return "SUCCESS";
     }
 
@@ -62,7 +62,7 @@ public class CourseController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Returns a list of all attending users")
     @ResponseStatus(HttpStatus.OK)
-    public List<CourseUserDTO> getUsers(Principal principal, @PathVariable long courseId){
+    public List<CourseUserDTO> getUsers(Principal principal, @PathVariable long courseId) {
         return courseService.getCourseUsers(principal.getName(), courseId);
     }
 
@@ -70,8 +70,8 @@ public class CourseController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Deletes a user from the course")
     @ResponseStatus(HttpStatus.OK)
-    public String deleteUserFromCourse(Principal principal, @RequestBody CourseUserDeleteDTO dto, @PathVariable long courseId){
-        courseService.deleteUserFromCourse(principal.getName(), dto.getUsername(), courseId);
+    public String deleteUserFromCourse(Principal principal, @RequestBody CourseUserDeleteDTO dto, @PathVariable long courseId) {
+        courseService.deleteUserFromCourse(principal.getName(), dto.username(), courseId);
         return "SUCCESS";
     }
 

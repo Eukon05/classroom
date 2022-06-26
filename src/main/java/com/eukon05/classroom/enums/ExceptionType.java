@@ -1,11 +1,5 @@
 package com.eukon05.classroom.enums;
 
 public enum ExceptionType {
-
-    empty,
-    tooLong,
-    tooShort,
-    spaces,
-    selfRoleChange
-
+    EMPTY, TOO_LONG, TOO_SHORT, SPACES, SELF_ROLE_CHANGE
 }
