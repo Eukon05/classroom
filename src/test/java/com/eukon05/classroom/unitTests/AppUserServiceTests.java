@@ -79,7 +79,7 @@ public class AppUserServiceTests {
                 .thenReturn(Optional.of(test));
 
         assertFalse(appUserService.getUserCourses("testOne").isEmpty());
-        assertEquals("course", appUserService.getUserCourses("testOne").get(0).courseName());
+        assertEquals("course", appUserService.getUserCourses("testOne").get(0).name());
     }
 
     @Test
